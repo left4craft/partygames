@@ -3,7 +3,7 @@
 	<groupId>com.github.captnsisko</groupId>
 	<artifactId>partygames</artifactId>
 	<version>1.0</version>
-	<name>Left4Hub</name>
+	<name>PartyGames</name>
 	<description>Plugin that syncronizes cross-server chat and more</description>
 	<build>
 		<plugins>
@@ -62,12 +62,6 @@
 			<artifactId>jedis</artifactId>
 			<version>3.1.0-m3</version>
 		</dependency>
-		<dependency>
-			<groupId>litebans</groupId>
-			<artifactId>LiteBans</artifactId>
-			<version>1.0</version>
-		</dependency>
-
 		<dependency>
 			<groupId>net.luckperms</groupId>
 			<artifactId>api</artifactId>
