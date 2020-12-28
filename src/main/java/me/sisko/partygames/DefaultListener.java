@@ -1,12 +1,17 @@
 package me.sisko.partygames;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -30,18 +35,24 @@ public class DefaultListener implements Listener {
 
     // by default, disallow block modifications
     @EventHandler(priority = EventPriority.LOW)
-    public void onBlockEvent(BlockEvent e) {
-        if (e instanceof Cancellable) {
-            ((Cancellable) e).setCancelled(true);
-        }
+    public void onBlockBreak(BlockBreakEvent e) {
+        if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
     }
 
     // by default, disallow inventory modifications
     @EventHandler(priority = EventPriority.LOW)
-    public void InventoryEvent(InventoryEvent e) {
-        if (e instanceof Cancellable) {
-            ((Cancellable) e).setCancelled(true);
-        }
+    public void onInventoryClick(InventoryClickEvent e) {
+        e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onItemDrop(EntityDropItemEvent e) {
+        e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
