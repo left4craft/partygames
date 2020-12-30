@@ -1,21 +1,26 @@
 package me.sisko.partygames;
 
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -30,7 +35,12 @@ public class DefaultListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent e) {
         e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");
-        //e.getPlayer().setGameMode(GameMode.SURVIVAL);
+        e.getPlayer().setGameMode(GameMode.SURVIVAL);
+
+        FileConfiguration config = Main.getPlugin().getConfig();
+        e.getPlayer().teleport(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
+            config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
+            (float) config.getDouble("spawn.pitch")));
     }
 
     // by default, disallow block modifications
@@ -44,6 +54,14 @@ public class DefaultListener implements Listener {
         if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
     }
 
+    
+	@EventHandler
+	public void onPlayerInteractEvent(PlayerInteractEvent e) {
+		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType().equals(Material.DIRT)) {
+			e.setCancelled(true);
+		}
+	}
+
     // by default, disallow inventory modifications
     @EventHandler(priority = EventPriority.LOW)
     public void onInventoryClick(InventoryClickEvent e) {
@@ -51,24 +69,47 @@ public class DefaultListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onItemDrop(EntityDropItemEvent e) {
+    public void onItemDrop(PlayerDropItemEvent e) {
         e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onHunger(FoodLevelChangeEvent e) {
-        if(e.getEntity() instanceof Player) {
-            ((Player) e.getEntity()).setFoodLevel(20);
-        }
+        e.setFoodLevel(20);
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityInteract(PlayerInteractEntityEvent e) {
+        if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
+    }
+
+    // protect paintings and item frames
+    @EventHandler(priority = EventPriority.LOW)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent  e) {
+        if(e.getDamager() instanceof Player) {
+            if(!((Player) e.getDamager()).getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
+        }
+    }
+
+    // cancel out fall damage, etc
+    @EventHandler(priority = EventPriority.LOW)
+    public void onEntityDamage(EntityDamageEvent e) {
         e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onItemDamage(PlayerItemDamageEvent e) {
         e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onVoidVall(PlayerMoveEvent e) {
+        if(e.getTo().getY() < 0) {
+            FileConfiguration config = Main.getPlugin().getConfig();
+            e.getPlayer().teleport(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
+                config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
+                (float) config.getDouble("spawn.pitch")));
+    
+        }
     }
 }

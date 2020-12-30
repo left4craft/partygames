@@ -1,0 +1,4 @@
+Human-readable file that contains where all the maps are
+
+Spawn:
+0 150 0
