@@ -36,7 +36,7 @@ public class DefaultListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");
         e.getPlayer().setGameMode(GameMode.SURVIVAL);
-
+        e.getPlayer().getInventory().clear();
         FileConfiguration config = Main.getPlugin().getConfig();
         e.getPlayer().teleport(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
             config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
@@ -57,7 +57,7 @@ public class DefaultListener implements Listener {
     
 	@EventHandler
 	public void onPlayerInteractEvent(PlayerInteractEvent e) {
-		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType().equals(Material.DIRT)) {
+		if (e.getAction() == Action.PHYSICAL && (e.getClickedBlock().getType().equals(Material.DIRT) || e.getClickedBlock().getType().equals(Material.FARMLAND))) {
 			e.setCancelled(true);
 		}
 	}
