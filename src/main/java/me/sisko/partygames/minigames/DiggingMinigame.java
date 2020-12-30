@@ -1,18 +1,23 @@
 package me.sisko.partygames.minigames;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.MinigameManager;
 
 public class DiggingMinigame extends Minigame {
     private String name;
@@ -27,8 +32,11 @@ public class DiggingMinigame extends Minigame {
     private List<Location> stackStarts;
     private int height;
     private List<Location> spawns;
-    private double winningY;
-    
+    private double lowestY;
+
+    private List<Player> inGame;
+    private List<Player> winners;
+
     @Override
     public String getName() {
         return name;
@@ -75,14 +83,16 @@ public class DiggingMinigame extends Minigame {
             winnerJson.getFloat("yaw"), winnerJson.getFloat("pitch"));
 
         // add the stack starting locations
-        int lowest_y = json.getInt("stack_lowest_block_y");
+        lowestY = json.getInt("stack_lowest_block_y");
         height = json.getInt("stack_height");
-        winningY = ((double) lowest_y) - 0.5;
 
+        stackStarts = new ArrayList<Location>();
+        spawns = new ArrayList<Location>();
         for(final Object stack : json.getJSONArray("stacks")) {
             JSONObject stackJson = (JSONObject) stack;
-            stackStarts.add(new Location(Main.getWorld(), stackJson.getInt("x"), lowest_y, stackJson.getInt("z")));
-            spawns.add(new Location(Main.getWorld(), stackJson.getDouble("x")+0.5, 0.5+lowest_y+height, stackJson.getDouble("z")+0.5));
+
+            stackStarts.add(new Location(Main.getWorld(), stackJson.getInt("x"), lowestY, stackJson.getInt("z")));
+            spawns.add(new Location(Main.getWorld(), stackJson.getDouble("x")+0.5, 0.5+lowestY+height, stackJson.getDouble("z")+0.5));
         }
     }
 
@@ -94,15 +104,26 @@ public class DiggingMinigame extends Minigame {
         for(int y = 0; y < height; y++) {
             Material m = block_types[rng.nextInt(block_types.length)];
             for(Location stackStart : stackStarts) {
-                stackStart.add(0, y, 0).getBlock().setType(m);
+                (new Location(stackStart.getWorld(), stackStart.getX(), stackStart.getY()+y, stackStart.getZ())).getBlock().setType(m);
             }
         }
+
+        MinigameManager.initializationComplete();
     }
 
     @Override
-    public void start(List<Player> players) {
-        // TODO Auto-generated method stub
-
+    public void start(final List<Player> players) {
+        inGame = new ArrayList<Player>();
+        for(int i = 0; i < players.size(); i++) {
+            final Player p = players.get(i);
+            p.teleport(spawns.get(i));
+            inGame.add(p);
+            p.setGameMode(GameMode.SURVIVAL);
+            p.getInventory().clear();
+            p.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
+            p.getInventory().addItem(new ItemStack(Material.STONE_AXE));
+            p.getInventory().addItem(new ItemStack(Material.STONE_SHOVEL));
+        }
     }
 
     @Override
@@ -114,18 +135,31 @@ public class DiggingMinigame extends Minigame {
     @Override @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.getPlayer().teleport(spectatorLocation);
-
     }
 
     @Override @EventHandler
     public void onLeave(PlayerQuitEvent e) {
-        // TODO Auto-generated method stub
+        if(inGame.contains(e.getPlayer())) inGame.remove(e.getPlayer());
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent e) {
-        if(e.getTo().getY() < winningY) {
-            e.getPlayer().teleport(winnerLocation);
+    public void onBreak(BlockBreakEvent e) {
+        if(inGame.contains(e.getPlayer())) {
+            boolean allowed = false;
+            for (Material m : block_types) {
+                if(e.getBlock().getType() == m) allowed = true;
+            }
+            if(allowed) {
+                e.setCancelled(false);
+                if(e.getBlock().getLocation().getY()-0.5 <= lowestY) {
+                    e.getPlayer().teleport(winnerLocation);
+                    inGame.remove(e.getPlayer());
+                    winners.add(e.getPlayer());
+                    
+                }
+            }
+        } else {
+            e.setCancelled(true);
         }
     }
 }

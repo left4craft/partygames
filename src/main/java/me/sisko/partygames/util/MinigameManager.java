@@ -8,7 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
@@ -19,7 +24,10 @@ public class MinigameManager {
     // maps a string, representing the minigame type, to a list
     // of minigames. Each minigame object represents only a single
     // json file.
+    
     private static Map<String, List<Minigame>> minigames;
+    private static Minigame currentMinigame;
+
 
     public static void load() {
         File dataFolder = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/games");
@@ -55,6 +63,33 @@ public class MinigameManager {
                 }
             }
         }
+    }
+
+    public static final boolean isValidType(String type) {
+        return minigames.containsKey(type);
+    }
+
+    public static final String[] getTypes() {
+        return minigames.keySet().stream().toArray(String[]::new);
+    }
+
+    public static void playGame(String type) {
+        // select a random map, given minigame type
+        currentMinigame = minigames.get(type).get(new Random().nextInt(minigames.get(type).size()));
+        currentMinigame.initialize();
+    }
+
+    // called by the minigame when done initializing
+    public static void initializationComplete() {
+        currentMinigame.start(Main.getPlugin().getServer().getOnlinePlayers().stream().collect(Collectors.toList()));
+        Bukkit.getPluginManager().registerEvents(currentMinigame, Main.getPlugin());
+    }
+
+    // called by the minigame when it is done running
+    public static void gameComplete(List<Player> winners) {
+        currentMinigame.cleanup();
+        HandlerList.unregisterAll(currentMinigame);
+        winners.get(0).sendMessage("You are winner !");
     }
 
     private static final JSONObject getJson(File f) {
