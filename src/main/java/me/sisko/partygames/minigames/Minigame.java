@@ -17,6 +17,10 @@ are free to add additional helper functions and events as needed
 */
 public abstract class Minigame implements Listener {
 
+    public abstract String getName();
+    public abstract String getDescription();
+    public abstract String getMap();
+
     // verify a json object contains all needed parameters
     public abstract boolean jsonValid(JSONObject json);
 
@@ -32,9 +36,6 @@ public abstract class Minigame implements Listener {
 
     // garbage collection etc
     public abstract void cleanup();
-
-    public abstract String getName();
-
 
     @EventHandler
     public abstract void onJoin(PlayerJoinEvent e);

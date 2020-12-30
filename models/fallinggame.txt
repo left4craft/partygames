@@ -1,0 +1,47 @@
+name = Speed Mining
+description = Mine down as fast as possible using the tools you are given!
+map = "Forest"
+
+type = digging
+
+stack_lowest_block_y n = 4
+stack_height n = 55
+
+stacks[0]
+  x n = 0
+  z n = 492
+stacks[1]
+  x n = 5
+  z n = 494
+stacks[2]
+  x n = 8
+  z n = 500
+stacks[3]
+  x n = 6
+  z n = 505
+stacks[4]
+  x n = 0
+  z n = 508
+stacks[5]
+  x n = -5
+  z n = 506
+stacks[6]
+  x n = -8
+  z n = 500
+stacks[7]
+  x n = -6
+  z n = 495
+
+spectator_spawn
+  x n = -17.5
+  y n = 18
+  z n = 499.5
+  yaw n = -90
+  pitch n = 0
+
+winner_spawn
+  x n = 0.5
+  y n = 6.5
+  z n = 500.5
+  yaw n = 0
+  pitch n = 0

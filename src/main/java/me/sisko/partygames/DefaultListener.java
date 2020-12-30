@@ -38,7 +38,7 @@ public class DefaultListener implements Listener {
         e.getPlayer().setGameMode(GameMode.SURVIVAL);
         e.getPlayer().getInventory().clear();
         FileConfiguration config = Main.getPlugin().getConfig();
-        e.getPlayer().teleport(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
+        e.getPlayer().teleport(new Location(Main.getWorld(), config.getDouble("spawn.x"), 
             config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
             (float) config.getDouble("spawn.pitch")));
     }
