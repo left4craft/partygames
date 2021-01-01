@@ -1,6 +1,6 @@
 name = Speed Mining
 description = Mine down as fast as possible using the tools you are given!
-map = "Forest"
+map = Forest
 
 type = digging
 

@@ -1,0 +1,25 @@
+name = TNT Run
+description = Be careful not to fall as the blocks below your feet are destroyed.
+map = Colosseum
+
+type = tntrun
+
+layers[0]
+  y n = 64
+  x_1 n = 29
+  z_1 n = 1029
+  x_2 n = -29
+  z_2 n = 971
+layers[1]
+  y n = 56
+  x_1 n = 29
+  z_1 n = 1029
+  x_2 n = -29
+  z_2 n = 971
+
+spawn
+  x n = 0.5
+  y n = 66.
+  z n = 1000.5
+  yaw n = 0
+  pitch n = 0

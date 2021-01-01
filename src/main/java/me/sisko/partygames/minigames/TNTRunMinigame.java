@@ -3,16 +3,16 @@ package me.sisko.partygames.minigames;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
+import com.boydti.fawe.util.EditSessionBuilder;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.extension.factory.PatternFactory;
-import com.sk89q.worldedit.extension.input.InputParseException;
-import com.sk89q.worldedit.extension.input.ParserContext;
-import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.block.BlockTypes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -37,12 +37,14 @@ public class TNTRunMinigame extends Minigame {
     private List<Player> winners;
     private boolean gameStarted;
 
+    private BukkitRunnable floorDecay;
+
     @Override
     public final boolean jsonValid(final JSONObject json) {
-        final String[] keys = {"name", "description", "map", "spawn",
-            "layers"};
-        for(final String key : keys) {
-            if(!json.has(key)) return false;
+        final String[] keys = { "name", "description", "map", "spawn", "layers" };
+        for (final String key : keys) {
+            if (!json.has(key))
+                return false;
         }
         return true;
     }
@@ -58,23 +60,20 @@ public class TNTRunMinigame extends Minigame {
 
         // add the spawn points
         final JSONObject spectatorJson = json.getJSONObject("spawn");
-        spawn = new Location(Main.getWorld(), spectatorJson.getDouble("x"),
-            spectatorJson.getDouble("y"), spectatorJson.getDouble("z"),
-            spectatorJson.getFloat("yaw"), spectatorJson.getFloat("pitch"));
+        spawn = new Location(Main.getWorld(), spectatorJson.getDouble("x"), spectatorJson.getDouble("y"),
+                spectatorJson.getDouble("z"), spectatorJson.getFloat("yaw"), spectatorJson.getFloat("pitch"));
 
-        
         lowestY = 255;
         layers = new ArrayList<BlockVector3[]>();
-        for(final Object layer : json.getJSONArray("layers")) {
+        for (final Object layer : json.getJSONArray("layers")) {
             JSONObject layerJson = (JSONObject) layer;
 
             final int y = layerJson.getInt("y");
-            if(y < lowestY) lowestY = y;
+            if (y < lowestY)
+                lowestY = y;
 
-            BlockVector3[] layerLocation = {
-                BlockVector3.at(layerJson.getInt("x_1"), y, layerJson.getInt("z_1")),
-                BlockVector3.at(layerJson.getInt("x_2"), y, layerJson.getInt("z_2"))
-            };
+            BlockVector3[] layerLocation = { BlockVector3.at(layerJson.getInt("x_1"), y, layerJson.getInt("z_1")),
+                    BlockVector3.at(layerJson.getInt("x_2"), y, layerJson.getInt("z_2")) };
 
             layers.add(layerLocation);
         }
@@ -87,13 +86,13 @@ public class TNTRunMinigame extends Minigame {
         gameStarted = false;
 
         // build the tnt arena
-        for(BlockVector3[] layer : layers) {
+        for (BlockVector3[] layer : layers) {
             CuboidRegion selection = new CuboidRegion(layer[0], layer[1]);
-
             try {
-                Pattern pattern = new PatternFactory(WorldEdit.getInstance()).parseFromInput("minecraft:red_sandstone", new ParserContext());
-                WorldEdit.getInstance().newEditSession(new BukkitWorld(Main.getWorld())).setBlocks(selection, pattern);
-            } catch (InputParseException | MaxChangedBlocksException e) {
+                EditSession edit = new EditSessionBuilder(BukkitAdapter.adapt(Main.getWorld())).build();
+                edit.setBlocks((Region) selection, BlockTypes.RED_SANDSTONE);
+                edit.close();
+            } catch (MaxChangedBlocksException e) {
                 Main.getPlugin().getLogger().warning("Could not set the tnt run floor!");
                 e.printStackTrace();
             }
@@ -117,11 +116,44 @@ public class TNTRunMinigame extends Minigame {
     @Override
     public void start() {
         gameStarted = true;
+        floorDecay = new BukkitRunnable(){
+            @Override
+            public void run() {
+                Random rng = new Random();
+                for (BlockVector3[] layer : layers) {
+                    final int minz = Math.min(layer[0].getBlockZ(), layer[1].getBlockZ());
+                    final int maxz = Math.max(layer[0].getBlockZ(), layer[1].getBlockZ());
+
+                    final int minx = Math.min(layer[0].getBlockX(), layer[1].getBlockX());
+                    final int maxx = Math.max(layer[0].getBlockX(), layer[1].getBlockX());
+
+                    for(int x = minx; x <= maxx; x++) {
+                        for(int z = minz; z < maxz; z++) {
+                            if(rng.nextInt(100) == 1) {
+                                Block block = new Location(Main.getWorld(), x, layer[0].getBlockY(), z).getBlock();
+                                if(!(block.getType() == Material.AIR)) {
+                                    block.setType(Material.ORANGE_TERRACOTTA);                         
+                                    new BukkitRunnable() {
+                                        @Override
+                                        public void run() {
+                                            block.setType(Material.AIR);
+                                        }
+                                    }.runTaskLater(Main.getPlugin(), 10);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        floorDecay.runTaskTimer(Main.getPlugin(), 0, 20);
     }
 
     @Override
     public void postgame() {
         gameStarted = false;
+        floorDecay.cancel();
     }
 
     @Override
@@ -129,6 +161,7 @@ public class TNTRunMinigame extends Minigame {
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.setFlying(false);
             p.setAllowFlight(false);
+            p.setInvisible(false);
         }
         inGame.clear();
         winners.clear();
@@ -146,8 +179,9 @@ public class TNTRunMinigame extends Minigame {
     @Override
     public void addPlayer(Player p) {
         p.teleport(spawn);
-        p.setFlying(true);
+        p.setInvisible(true);
         p.setAllowFlight(true);
+        p.setFlying(true);
     }
 
     @Override
@@ -155,8 +189,9 @@ public class TNTRunMinigame extends Minigame {
         if(inGame.contains(p)) inGame.remove(p);
         p.setFlying(false);
         p.setAllowFlight(false);
+        p.setInvisible(false);
 
-        if(inGame.size() == 0 && gameStarted) {
+        if(inGame.size() <= 1 && gameStarted) {
             Collections.reverse(winners);
             MinigameManager.gameComplete(winners);
         }
@@ -171,25 +206,45 @@ public class TNTRunMinigame extends Minigame {
                 winners.add(e.getPlayer());
                 addPlayer(e.getPlayer());  
 
-                if(inGame.size() == 0) {
+                if(inGame.size() <= 1) {
                     Collections.reverse(winners);
                     MinigameManager.gameComplete(winners);
                 }
+            } else if (!inGame.contains(e.getPlayer())) {
+                e.setCancelled(false);
+                addPlayer(e.getPlayer());
             }
         } else if (inGame.contains(e.getPlayer()) && gameStarted) {
-            Block below = e.getPlayer().getLocation().add(0, -1, 0).getBlock();
+
+            Block breakBlocks[] = new Block[9];
+            // get blocks all around where the player is standing
+            // such that it is impossible for player to stay in one place
+            for(int i = 0; i < 9; i++) {
+                breakBlocks[i] = e.getPlayer().getLocation().add(((i%3)-1)/2, -0.5, (Math.floor(i/3)-1)/2).getBlock();
+            }
 
             // @TODO make block types configurable
             // also need to change the initialize() method
-            if(below.getType().equals(Material.RED_SANDSTONE)) {
-                below.setType(Material.ORANGE_TERRACOTTA);
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        below.setType(Material.AIR);
-                    }
-                }.runTaskLater(Main.getPlugin(), 20);
+            for(Block below : breakBlocks) {
+                if(below.getType().equals(Material.RED_SANDSTONE)) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            below.setType(Material.ORANGE_TERRACOTTA);
+                        }
+                    }.runTaskLater(Main.getPlugin(), 10);
+                
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            below.setType(Material.AIR);
+                        }
+                    }.runTaskLater(Main.getPlugin(), 20);
+                }
             }
+        // after game ends, winner falls down
+        } else if (!gameStarted) {
+            e.getPlayer().teleport(spawn);
         }
     }
 }

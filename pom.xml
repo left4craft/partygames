@@ -43,8 +43,8 @@
 			<url>https://jitpack.io</url>
 		</repository>
 		<repository>
-  			<id>enginehub-maven</id>
-  			<url>http://maven.enginehub.org/repo/</url>
+  			<id>IntellectualSites</id>
+  			<url>https://mvn.intellectualsites.com/content/repositories/releases/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -61,10 +61,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-    		<groupId>com.sk89q.worldedit</groupId>
-    		<artifactId>worldedit-bukkit</artifactId>
-    		<version>7.2.0-SNAPSHOT</version>
-    		<scope>provided</scope>
+  		<groupId>com.intellectualsites.fawe</groupId>
+  			<artifactId>FAWE-Bukkit</artifactId>
+  			<version>1.16-462</version>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
