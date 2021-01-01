@@ -17,7 +17,7 @@ public class playCommand implements CommandExecutor {
                 if(MinigameManager.isValidType(args[0])) {
                     MinigameManager.playGame(args[0]);
                 } else {
-                    sender.sendMessage(args[0] + "is not a valid game!");
+                    sender.sendMessage(args[0] + " is not a valid game!");
                 }
             }
         }

@@ -1,18 +1,17 @@
 package me.sisko.partygames.minigames;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
@@ -20,12 +19,9 @@ import me.sisko.partygames.Main;
 import me.sisko.partygames.util.MinigameManager;
 
 public class DiggingMinigame extends Minigame {
-    private String name;
-    private String description;
-    private String map;
 
     private final Material[] block_types = {Material.DIRT, Material.SNOW_BLOCK,
-    Material.STONE, Material.NETHERRACK, Material.DARK_OAK_LOG, Material.OAK_PLANKS};
+    Material.STONE, Material.NETHERRACK, Material.DARK_OAK_LOG, Material.OAK_PLANKS, Material.COBWEB};
 
     private Location winnerLocation;
     private Location spectatorLocation;
@@ -36,24 +32,10 @@ public class DiggingMinigame extends Minigame {
 
     private List<Player> inGame;
     private List<Player> winners;
+    private boolean gameStarted;
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public String getMap() {
-        return map;
-    }
-
-    @Override
-    public boolean jsonValid(JSONObject json) {
+    public final boolean jsonValid(final JSONObject json) {
         final String[] keys = {"name", "description", "map", "stack_lowest_block_y",
             "stack_height", "stacks", "spectator_spawn", "winner_spawn"};
         for(final String key : keys) {
@@ -63,7 +45,7 @@ public class DiggingMinigame extends Minigame {
     }
 
     @Override
-    public void setup(JSONObject json) {
+    public void setup(final JSONObject json) {
 
         name = json.getString("name");
         description = json.getString("description");
@@ -99,6 +81,9 @@ public class DiggingMinigame extends Minigame {
     @Override
     public void initialize() {
         Random rng = new Random();
+        winners = new ArrayList<Player>();
+        inGame = new ArrayList<Player>();
+        gameStarted = false;
 
         // build all the stacks
         for(int y = 0; y < height; y++) {
@@ -112,34 +97,63 @@ public class DiggingMinigame extends Minigame {
     }
 
     @Override
-    public void start(final List<Player> players) {
-        inGame = new ArrayList<Player>();
+    public void prestart(final List<Player> players) {
+        List<ItemStack> tools = new ArrayList<ItemStack>();
+        tools.add(new ItemStack(Material.STONE_PICKAXE));
+        tools.add(new ItemStack(Material.STONE_AXE));
+        tools.add(new ItemStack(Material.STONE_SHOVEL));
+        tools.add(new ItemStack(Material.STONE_SWORD));
+        Collections.shuffle(tools, new Random());
+        
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
-            p.teleport(spawns.get(i));
+            
             inGame.add(p);
+            p.teleport(spawns.get(i));
             p.setGameMode(GameMode.SURVIVAL);
             p.getInventory().clear();
-            p.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
-            p.getInventory().addItem(new ItemStack(Material.STONE_AXE));
-            p.getInventory().addItem(new ItemStack(Material.STONE_SHOVEL));
+            for(final ItemStack item : tools) {
+                p.getInventory().addItem(item);
+            }
         }
+        MinigameManager.prestartComplete();
+    }
+
+    @Override
+    public void start() {
+        gameStarted = true;
+    }
+
+    @Override
+    public void postgame() {
+        gameStarted = false;
     }
 
     @Override
     public void cleanup() {
-        // TODO Auto-generated method stub
-
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            p.getInventory().clear();
+        }
+        inGame.clear();
+        winners.clear();
     }
 
-    @Override @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
-        e.getPlayer().teleport(spectatorLocation);
+    @Override
+    public final List<Player> timeout() {
+        return winners;
     }
 
-    @Override @EventHandler
-    public void onLeave(PlayerQuitEvent e) {
-        if(inGame.contains(e.getPlayer())) inGame.remove(e.getPlayer());
+    @Override
+    public void addPlayer(Player p) {
+        p.teleport(spectatorLocation);
+    }
+
+    @Override
+    public void removePlayer(Player p) {
+        if(inGame.contains(p)) inGame.remove(p);
+        if(inGame.size() == 0 && gameStarted) {
+            MinigameManager.gameComplete(winners);
+        }
     }
 
     @EventHandler
@@ -149,14 +163,22 @@ public class DiggingMinigame extends Minigame {
             for (Material m : block_types) {
                 if(e.getBlock().getType() == m) allowed = true;
             }
+            allowed = allowed && gameStarted;
+
             if(allowed) {
                 e.setCancelled(false);
                 if(e.getBlock().getLocation().getY()-0.5 <= lowestY) {
                     e.getPlayer().teleport(winnerLocation);
+                    e.getPlayer().getInventory().clear();
                     inGame.remove(e.getPlayer());
                     winners.add(e.getPlayer());
-                    
+                    if(gameStarted && (inGame.size() == 0 || winners.size() >= 3)) {
+                        MinigameManager.gameComplete(winners);
+                    }
                 }
+
+                // not sure why this is needed, but it destroys the last block
+                e.getBlock().setType(Material.AIR);
             }
         } else {
             e.setCancelled(true);
