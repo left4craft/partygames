@@ -64,6 +64,7 @@
   		<groupId>com.intellectualsites.fawe</groupId>
   			<artifactId>FAWE-Bukkit</artifactId>
   			<version>1.16-462</version>
+			  <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
@@ -75,6 +76,11 @@
 			<artifactId>api</artifactId>
 			<version>5.0</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+	    	<groupId>com.github.missionarydev</groupId>
+	    	<artifactId>board</artifactId>
+	    	<version>-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

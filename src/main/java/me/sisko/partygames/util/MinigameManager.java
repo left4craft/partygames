@@ -33,6 +33,17 @@ public class MinigameManager {
     private static Minigame currentMinigame = null;
     private static BukkitRunnable timeout = null;
 
+    private static long endTime = 0;
+
+    public static enum GameState {
+        PREGAME,
+        INGAME,
+        POSTGAME,
+        NOGAME
+    };
+
+    private static GameState state = GameState.NOGAME;
+
 
     public static void load() {
         File dataFolder = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/games");
@@ -96,6 +107,9 @@ public class MinigameManager {
 
     // called by the minigame when done initializing
     public static void prestartComplete() {
+        endTime = System.currentTimeMillis() + 10*1000;
+        state = GameState.PREGAME;
+
         Bukkit.broadcastMessage("Game starting in 10 seconds...");
 
         new BukkitRunnable(){
@@ -130,6 +144,9 @@ public class MinigameManager {
                 };
                 timeout.runTaskLater(Main.getPlugin(), currentMinigame.getTimeoutTime());
                 currentMinigame.start();
+
+                state = GameState.INGAME;
+                endTime = System.currentTimeMillis() + currentMinigame.getTimeoutTime()*1000/20;
             }
         }.runTaskLater(Main.getPlugin(), 10*20);
         
@@ -140,7 +157,9 @@ public class MinigameManager {
         timeout.cancel();
         timeout = null;
         currentMinigame.postgame();     
-   
+        state = GameState.POSTGAME;
+        endTime = System.currentTimeMillis() + 10*1000;
+
         Bukkit.broadcastMessage("Minigame " + currentMinigame.getName() + " complete!");
         Bukkit.broadcastMessage("Map: " + currentMinigame.getMap());
         Bukkit.broadcastMessage("Winners: ");
@@ -175,6 +194,7 @@ public class MinigameManager {
                 HandlerList.unregisterAll(currentMinigame);
                 currentMinigame.cleanup();
                 currentMinigame = null;
+                state = GameState.NOGAME;
 
                 for(Player p : Bukkit.getOnlinePlayers()) {
                     FileConfiguration config = Main.getPlugin().getConfig();
@@ -215,5 +235,34 @@ public class MinigameManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    
+    public static final List<String> getScoreboardLines(Player p) {
+        List<String> lines = new ArrayList<>();
+        lines.add("&6mc.left4craft.org");
+        lines.add("&7&m-----------------");
+        lines.add("&dGame&7: &e" + currentMinigame.getName());
+        lines.add("");
+        lines.add("&dMap&7: &e" + currentMinigame.getMap());
+        lines.add("");
+
+        final long diff = 1000 + endTime - System.currentTimeMillis();
+        final int seconds = (int) Math.floor((diff%60000) / 1000);
+        final String seconds_str = seconds < 10 ? "0" + seconds : "" + seconds;
+
+        if(state == GameState.PREGAME) {
+            lines.add("&dGame starts&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("");
+        } else if (state == GameState.INGAME) {
+            lines.add("&dGame finishes&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("");
+        } else if (state == GameState.POSTGAME) {
+            lines.add("&dGame ends&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("");
+        }
+
+        lines.add("&7&m-----------------");
+        return lines;
     }
 }

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
 import me.sisko.partygames.util.MinigameManager;
+import net.md_5.bungee.api.ChatColor;
 
 public class DiggingMinigame extends Minigame {
 

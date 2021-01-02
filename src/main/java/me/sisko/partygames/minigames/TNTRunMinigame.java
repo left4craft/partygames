@@ -213,6 +213,10 @@ public class TNTRunMinigame extends Minigame {
             } else if (!inGame.contains(e.getPlayer())) {
                 e.setCancelled(false);
                 addPlayer(e.getPlayer());
+            
+            // player is in game after winning and has just died
+            } else {
+                addPlayer(e.getPlayer());
             }
         } else if (inGame.contains(e.getPlayer()) && gameStarted) {
 
@@ -243,8 +247,6 @@ public class TNTRunMinigame extends Minigame {
                 }
             }
         // after game ends, winner falls down
-        } else if (!gameStarted) {
-            e.getPlayer().teleport(spawn);
         }
     }
 }
