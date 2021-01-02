@@ -36,6 +36,7 @@ public class MinigameManager {
     private static long endTime = 0;
 
     public static enum GameState {
+        INITIALIZING,
         PREGAME,
         INGAME,
         POSTGAME,
@@ -54,6 +55,7 @@ public class MinigameManager {
 
 
         minigames = new HashMap<String, List<Minigame>>();
+
         for (File game : dataFolder.listFiles()) {
             Main.getPlugin().getLogger().info("Loading " + game.getName());
             final JSONObject minigameJson = getJson(game);
@@ -94,6 +96,12 @@ public class MinigameManager {
     }
 
     public static void playGame(String type) {
+        if(state != GameState.NOGAME) {
+            Main.getPlugin().getLogger().warning("playGame() called when there is already a game being played!");
+            return;
+        }
+        state = GameState.INITIALIZING;
+
         // select a random map, given minigame type
         currentMinigame = minigames.get(type).get(new Random().nextInt(minigames.get(type).size()));
         currentMinigame.initialize();
@@ -101,6 +109,12 @@ public class MinigameManager {
 
     // called by the minigame when done initializing
     public static void initializationComplete() {
+        if(state != GameState.INITIALIZING) {
+            Main.getPlugin().getLogger().warning("initializationComplete() called when initialization is already complete!");
+            return;
+        }
+        state = GameState.PREGAME;
+
         currentMinigame.prestart(Main.getPlugin().getServer().getOnlinePlayers().stream().collect(Collectors.toList()));
         Bukkit.getPluginManager().registerEvents(currentMinigame, Main.getPlugin());
     }
@@ -108,7 +122,6 @@ public class MinigameManager {
     // called by the minigame when done initializing
     public static void prestartComplete() {
         endTime = System.currentTimeMillis() + 10*1000;
-        state = GameState.PREGAME;
 
         Bukkit.broadcastMessage("Game starting in 10 seconds...");
 
@@ -154,10 +167,15 @@ public class MinigameManager {
 
     // called by the minigame when it is done running
     public static void gameComplete(final List<Player> winners) {
+        if(state != GameState.INGAME) {
+            Main.getPlugin().getLogger().warning("gameComplete() called when not currently in a game!");
+            return;
+        }
+        state = GameState.POSTGAME;
+
         timeout.cancel();
         timeout = null;
         currentMinigame.postgame();     
-        state = GameState.POSTGAME;
         endTime = System.currentTimeMillis() + 10*1000;
 
         Bukkit.broadcastMessage("Minigame " + currentMinigame.getName() + " complete!");
@@ -240,29 +258,28 @@ public class MinigameManager {
     
     public static final List<String> getScoreboardLines(Player p) {
         List<String> lines = new ArrayList<>();
-        lines.add("&6mc.left4craft.org");
-        lines.add("&7&m-----------------");
-        lines.add("&dGame&7: &e" + currentMinigame.getName());
-        lines.add("");
-        lines.add("&dMap&7: &e" + currentMinigame.getMap());
-        lines.add("");
 
         final long diff = 1000 + endTime - System.currentTimeMillis();
         final int seconds = (int) Math.floor((diff%60000) / 1000);
         final String seconds_str = seconds < 10 ? "0" + seconds : "" + seconds;
 
         if(state == GameState.PREGAME) {
-            lines.add("&dGame starts&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("&bGame starts: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
+            lines.add("&bGame: &f" + currentMinigame.getName());
+            lines.add("");
+            lines.add("&bMap: &f" + currentMinigame.getMap());
         } else if (state == GameState.INGAME) {
-            lines.add("&dGame finishes&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("&bGame finishes: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
+            lines.addAll(currentMinigame.getScoreboardLinesLines(p));
         } else if (state == GameState.POSTGAME) {
-            lines.add("&dGame ends&7: &e" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
+            lines.add("&bGame ends: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
+            lines.add("&bGame: &f" + currentMinigame.getName());
+            lines.add("");
+            lines.add("&bMap: &f" + currentMinigame.getMap());
         }
-
-        lines.add("&7&m-----------------");
         return lines;
     }
 }

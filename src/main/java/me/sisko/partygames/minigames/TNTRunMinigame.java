@@ -85,20 +85,6 @@ public class TNTRunMinigame extends Minigame {
         inGame = new ArrayList<Player>();
         gameStarted = false;
 
-        // build the tnt arena
-        for (BlockVector3[] layer : layers) {
-            CuboidRegion selection = new CuboidRegion(layer[0], layer[1]);
-            try {
-                EditSession edit = new EditSessionBuilder(BukkitAdapter.adapt(Main.getWorld())).build();
-                edit.setBlocks((Region) selection, BlockTypes.RED_SANDSTONE);
-                edit.close();
-            } catch (MaxChangedBlocksException e) {
-                Main.getPlugin().getLogger().warning("Could not set the tnt run floor!");
-                e.printStackTrace();
-            }
-
-        }
-
         MinigameManager.initializationComplete();
     }
 
@@ -165,13 +151,25 @@ public class TNTRunMinigame extends Minigame {
         }
         inGame.clear();
         winners.clear();
+
+        // build the tnt arena
+        for (BlockVector3[] layer : layers) {
+            CuboidRegion selection = new CuboidRegion(layer[0], layer[1]);
+            try {
+                EditSession edit = new EditSessionBuilder(BukkitAdapter.adapt(Main.getWorld())).build();
+                edit.setBlocks((Region) selection, BlockTypes.RED_SANDSTONE);
+                edit.close();
+            } catch (MaxChangedBlocksException e) {
+                Main.getPlugin().getLogger().warning("Could not set the tnt run floor!");
+                e.printStackTrace();
+            }
+        
+        }
     }
 
     @Override
     public final List<Player> timeout() {
-        for (Player p : inGame) {
-            winners.add(p);
-        }
+        winners.addAll(inGame);
         Collections.reverse(winners);
         return winners;
     }
@@ -192,6 +190,7 @@ public class TNTRunMinigame extends Minigame {
         p.setInvisible(false);
 
         if(inGame.size() <= 1 && gameStarted) {
+            winners.addAll(inGame);
             Collections.reverse(winners);
             MinigameManager.gameComplete(winners);
         }
@@ -207,6 +206,7 @@ public class TNTRunMinigame extends Minigame {
                 addPlayer(e.getPlayer());  
 
                 if(inGame.size() <= 1) {
+                    winners.addAll(inGame);
                     Collections.reverse(winners);
                     MinigameManager.gameComplete(winners);
                 }
@@ -249,4 +249,20 @@ public class TNTRunMinigame extends Minigame {
         // after game ends, winner falls down
         }
     }
+
+    @Override
+    public final List<String> getScoreboardLinesLines(Player p) {
+        List<String> retVal = new ArrayList<String>();
+        if(inGame.contains(p)) {
+            retVal.add("&bYou are &aalive");
+        } else {
+            retVal.add("&bYou are &cdead");
+        }
+        retVal.add("&bPlayers left: &f" + inGame.size());
+        for(Player ingamePlayer : inGame) {
+            retVal.add("&f" + ingamePlayer.getDisplayName());
+        }
+
+        return retVal;
+    } 
 }

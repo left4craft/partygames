@@ -16,8 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
-import net.md_5.bungee.api.ChatColor;
+import me.sisko.partygames.util.Leaderboard.PlayerScore;
 
 public class DiggingMinigame extends Minigame {
 
@@ -34,6 +35,8 @@ public class DiggingMinigame extends Minigame {
     private List<Player> inGame;
     private List<Player> winners;
     private boolean gameStarted;
+
+    private Leaderboard leaderboard;
 
     @Override
     public final boolean jsonValid(final JSONObject json) {
@@ -117,6 +120,9 @@ public class DiggingMinigame extends Minigame {
                 p.getInventory().addItem(item);
             }
         }
+
+        leaderboard = new Leaderboard(players);
+
         MinigameManager.prestartComplete();
     }
 
@@ -168,6 +174,9 @@ public class DiggingMinigame extends Minigame {
 
             if(allowed) {
                 e.setCancelled(false);
+
+                leaderboard.changeScore(e.getPlayer(), 1);
+
                 if(e.getBlock().getLocation().getY()-0.5 <= lowestY) {
                     e.getPlayer().teleport(winnerLocation);
                     e.getPlayer().getInventory().clear();
@@ -185,4 +194,21 @@ public class DiggingMinigame extends Minigame {
             e.setCancelled(true);
         }
     }
+
+    @Override
+    public final List<String> getScoreboardLinesLines(Player p) {
+        List<String> retVal = new ArrayList<String>();
+        if(leaderboard.contains(p)) {
+            retVal.add("&bYou are in &f" + leaderboard.getPlace(p) + "&b place");
+        } else {
+            retVal.add("&bYou are spectating");
+        }
+        retVal.add("&b&nLeaderboard");
+
+        for(final PlayerScore score : leaderboard.getLeaderboard()) {
+            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&a: &f" + score.getScore());
+        }
+
+        return retVal;
+    } 
 }

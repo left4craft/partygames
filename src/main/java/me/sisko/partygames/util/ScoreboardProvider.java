@@ -1,36 +1,61 @@
 package me.sisko.partygames.util;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import me.missionary.board.provider.BoardProvider;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class ScoreboardProvider implements BoardProvider {
     
+    private float hue = 0f;
+    private final float dashHueDiff = 0.01f;
+
     @Override
     public String getTitle(Player player) {
-        return ChatColor.LIGHT_PURPLE + "Party Games";
+        return "&a&lParty Games";
     }
 
     @Override
     public List<String> getLines(Player player) {
-        if(MinigameManager.inGame()) {
-            return MinigameManager.getScoreboardLines(player);
-        }
         List<String> lines = new ArrayList<>();
-        lines.add("&6mc.left4craft.org");
-        lines.add("&7&m-----------------");
-        lines.add(ChatColor.LIGHT_PURPLE + "Name" + ChatColor.GRAY + ": " + ChatColor.YELLOW + player.getName());
-        lines.add("");
-        lines.add(ChatColor.LIGHT_PURPLE + "Wins" + ChatColor.GRAY + ": " + ChatColor.YELLOW + "5");
-        lines.add("");
-        lines.add(ChatColor.LIGHT_PURPLE + "Points" + ChatColor.GRAY + ": " + ChatColor.YELLOW + "432");
-        lines.add("");
-        lines.add("&7&m-----------------");
+        lines.add("&amc.left4craft.org");
+        lines.add(getRainbowDashes(20));
+
+        if(MinigameManager.inGame()) {
+            lines.addAll(MinigameManager.getScoreboardLines(player));
+        } else {
+            lines.add("&bPlayers: &f" + Bukkit.getOnlinePlayers().size() + "/8");
+            lines.add("");
+            lines.add("&bWins: &f5");
+            lines.add("");
+            lines.add("&bPoints: &f432");
+        }
+        lines.add(getRainbowDashes(20));
         return lines;
+    }
+
+    private String getRainbowDashes(int length) {
+        TextComponent rainbow = new TextComponent();
+
+        for(int i = 0; i < length; i++) {
+            TextComponent dash = new TextComponent();
+            dash.setColor(ChatColor.of(Color.getHSBColor(hue - ((float)i)*dashHueDiff, 0.95f, 0.95f)));
+            dash.setStrikethrough(true);
+            dash.setText("-");
+            rainbow.addExtra(dash);
+        }
+        // increment the hue and wrap around to keep magnitude near 1
+        // so it doesn't slowly overflow / loose percision
+        hue += dashHueDiff;
+        hue -= Math.floor(hue);
+
+        return rainbow.toLegacyText();
     }
 
 }

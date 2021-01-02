@@ -22,7 +22,7 @@ public class Main extends JavaPlugin {
         getLogger().info("Hello World!");
         getCommand("play").setExecutor(new playCommand());
         
-        manager = new BoardManager(this, BoardSettings.builder().boardProvider(new ScoreboardProvider()).scoreDirection(ScoreDirection.UP).build());
+        manager = new BoardManager(this, new BoardSettings(new ScoreboardProvider(), ScoreDirection.UP));
         Bukkit.getPluginManager().registerEvents(manager, this);
         Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
         ConfigManager.load();

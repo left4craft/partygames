@@ -21,12 +21,12 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-					    <resources>
+					    <!-- <resources>
         					<resource>
             					<directory>${basedir}/src/main/resources/</directory>
             					<filtering>false</filtering>
         						</resource>
-    				</resources>
+    				</resources> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -84,9 +84,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-	    	<groupId>com.github.missionarydev</groupId>
+	    	<groupId>me.missionary</groupId>
 	    	<artifactId>board</artifactId>
-	    	<version>-SNAPSHOT</version>
+	    	<version>left4craft-1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
