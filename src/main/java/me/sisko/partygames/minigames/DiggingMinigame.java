@@ -206,7 +206,7 @@ public class DiggingMinigame extends Minigame {
         retVal.add("&b&nLeaderboard");
 
         for(final PlayerScore score : leaderboard.getLeaderboard()) {
-            retVal.add("&" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
         }
 
         return retVal;
