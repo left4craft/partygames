@@ -42,7 +42,7 @@ public class DropperMinigame extends Minigame {
         description = json.getString("description");
         map = json.getString("map");
 
-        Main.getPlugin().getLogger().info("Setting up a digging game arena map " + map);
+        Main.getPlugin().getLogger().info("Setting up a dropper game arena map " + map);
 
         // add the spawn points
         final JSONObject spawnJson = json.getJSONObject("spawn");
@@ -134,7 +134,7 @@ public class DropperMinigame extends Minigame {
             if(winners.size() == 3 || inGame.size() < 1) {
                 MinigameManager.gameComplete(winners);
             }
-        } else if (!gameStarted && e.getTo().getY() < spawn.getY()-1.) {
+        } else if (!gameStarted && e.getTo().getY() < spawn.getY()-1.5) {
             e.getPlayer().teleport(spawn);
         }
     }

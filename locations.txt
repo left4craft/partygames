@@ -11,3 +11,6 @@ TNT run:
 
 Dropper:
 500 211 0
+
+Spleef
+-500 65 0

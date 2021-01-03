@@ -1,0 +1,19 @@
+name = Spleef
+description = Dig below the blocks from below your opponent, but be careful not to fall!
+map = Dark Colosseum
+
+type = spleef
+
+floor
+  y n = 64
+  x_1 n = -530
+  z_1 n = -30
+  x_2 n = -472
+  z_2 n = 28
+
+spawn
+  x n = -500.5
+  y n = 66.
+  z n = 0.5
+  yaw n = 0
+  pitch n = 0
