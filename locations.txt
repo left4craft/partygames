@@ -6,5 +6,8 @@ Spawn:
 Digging game:
 0 18 500
 
-TNT run
+TNT run:
 0 65 1000
+
+Dropper:
+500 211 0

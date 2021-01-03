@@ -94,7 +94,7 @@ public class TNTRunMinigame extends Minigame {
             final Player p = players.get(i);
             
             inGame.add(p);
-            p.teleport(spawn);
+            p.teleportAsync(spawn);
         }
         MinigameManager.prestartComplete();
     }
@@ -260,7 +260,7 @@ public class TNTRunMinigame extends Minigame {
         }
         retVal.add("&bPlayers left: &f" + inGame.size());
         for(Player ingamePlayer : inGame) {
-            retVal.add("&f" + ingamePlayer.getDisplayName());
+            retVal.add("&a" + ingamePlayer.getDisplayName());
         }
 
         return retVal;

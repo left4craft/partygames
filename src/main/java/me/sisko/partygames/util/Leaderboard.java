@@ -91,4 +91,12 @@ public class Leaderboard {
         }
         return false;
     }
+
+    public final List<Player> getWinners() {
+        ArrayList<Player> winners = new ArrayList<Player>();
+        for(final PlayerScore score : scores) {
+            winners.add(score.getPlayer());
+        }
+        return winners;
+    }
 }

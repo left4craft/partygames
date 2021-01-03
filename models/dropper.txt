@@ -1,0 +1,12 @@
+name = Dropper
+description = Jump into the water below, but don't hit anything on the way down!
+map = Mother Earth
+
+type = dropper
+
+spawn
+  x n = 500.5
+  y n = 211.
+  z n = 0.5
+  yaw n = 0
+  pitch n = 0

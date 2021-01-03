@@ -113,7 +113,7 @@ public class DiggingMinigame extends Minigame {
             final Player p = players.get(i);
             
             inGame.add(p);
-            p.teleport(spawns.get(i));
+            p.teleportAsync(spawns.get(i));
             p.setGameMode(GameMode.SURVIVAL);
             p.getInventory().clear();
             for(final ItemStack item : tools) {
@@ -206,7 +206,7 @@ public class DiggingMinigame extends Minigame {
         retVal.add("&b&nLeaderboard");
 
         for(final PlayerScore score : leaderboard.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&a: &f" + score.getScore());
+            retVal.add("&" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
         }
 
         return retVal;
