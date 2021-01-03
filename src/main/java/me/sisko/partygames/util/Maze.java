@@ -13,13 +13,17 @@ Coordinate system: increasing x is right, increasing y is up
 public class Maze {
     private int height;
     private int width;
-
+    private int area_;
+    private class cellwall {
+        boolean right_;
+        boolean down_;
+    }
+    private ArrayList<cellwall> maze_ = new ArrayList<cellwall>();
+    private DisjointSet path_;
     // construct and solve a new maze
     public Maze(final int height, final int width) {
         this.height = height;
         this.width = width;
-
-        DisjointSet dj;
     }
 
     // return an int array representing start of maze
@@ -37,7 +41,7 @@ public class Maze {
     }
 
     // whether it is possible to move from (x,y) to (x, y+1)
-    public final boolean canMoveUp(final int x, final int y) {
+    public final boolean canMoveDown(final int x, final int y) {
         return false;
     }
 
@@ -45,7 +49,7 @@ public class Maze {
     public final boolean canMoveRight(final int x, final int y) {
         return false;
     }
-
+    
     /*
     Returns a list of moves representing the solution to a maze
 
