@@ -23,6 +23,7 @@ import me.sisko.partygames.Main;
 import me.sisko.partygames.minigames.DiggingMinigame;
 import me.sisko.partygames.minigames.DropperMinigame;
 import me.sisko.partygames.minigames.Minigame;
+import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
 
@@ -73,6 +74,8 @@ public class MinigameManager {
                 m = new DropperMinigame();
             } else if (type.equals("spleef")) {
                 m = new SpleefMinigame();
+            } else if(type.equals("parkour")) {
+                m = new ParkourMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly

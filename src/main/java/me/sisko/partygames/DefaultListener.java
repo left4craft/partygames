@@ -36,6 +36,8 @@ public class DefaultListener implements Listener {
     
     @EventHandler(priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent e) {
+        e.getPlayer().setCollidable(false);
+
         if(!MinigameManager.addPlayer(e.getPlayer())) {
             e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");
             e.getPlayer().setGameMode(GameMode.SURVIVAL);

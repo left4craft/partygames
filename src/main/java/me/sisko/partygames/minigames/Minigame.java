@@ -37,7 +37,7 @@ public abstract class Minigame implements Listener {
     the server
     override this method to change the default timeout period
     */
-    public final long getTimeoutTime() {
+    public long getTimeoutTime() {
         return 20*60*5;
     }
 

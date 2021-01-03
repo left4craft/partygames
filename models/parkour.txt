@@ -1,0 +1,15 @@
+name = Parkour
+description = Reach the end as fast as possible, hitting pressure plate checkpoints along the way.
+map = Floating Adventure
+
+type = parkour
+
+death_y n = 150
+finish_block = END_PORTAL
+
+spawn
+  x n = 500.5
+  y n = 169.
+  z n = 500.5
+  yaw n = 180
+  pitch n = 0
