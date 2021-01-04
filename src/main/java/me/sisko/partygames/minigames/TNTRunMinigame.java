@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
 import me.sisko.partygames.util.MinigameManager;
+import me.sisko.partygames.util.MinigameManager.GameState;
 
 public class TNTRunMinigame extends Minigame {
 
@@ -33,9 +34,7 @@ public class TNTRunMinigame extends Minigame {
     private List<BlockVector3[]> layers;
     private int lowestY;
 
-    private List<Player> inGame;
     private List<Player> winners;
-    private boolean gameStarted;
 
     private BukkitRunnable floorDecay;
 
@@ -82,8 +81,6 @@ public class TNTRunMinigame extends Minigame {
     @Override
     public void initialize() {
         winners = new ArrayList<Player>();
-        inGame = new ArrayList<Player>();
-        gameStarted = false;
 
         MinigameManager.initializationComplete();
     }
@@ -93,7 +90,6 @@ public class TNTRunMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            inGame.add(p);
             p.teleportAsync(spawn);
         }
         MinigameManager.prestartComplete();
@@ -101,7 +97,6 @@ public class TNTRunMinigame extends Minigame {
 
     @Override
     public void start() {
-        gameStarted = true;
         floorDecay = new BukkitRunnable(){
             @Override
             public void run() {
@@ -138,7 +133,6 @@ public class TNTRunMinigame extends Minigame {
 
     @Override
     public void postgame() {
-        gameStarted = false;
         floorDecay.cancel();
     }
 
@@ -149,7 +143,6 @@ public class TNTRunMinigame extends Minigame {
             p.setAllowFlight(false);
             p.setInvisible(false);
         }
-        inGame.clear();
         winners.clear();
 
         // build the tnt arena
@@ -169,7 +162,7 @@ public class TNTRunMinigame extends Minigame {
 
     @Override
     public final List<Player> timeout() {
-        winners.addAll(inGame);
+        winners.addAll(MinigameManager.getIngamePlayers());
         Collections.reverse(winners);
         return winners;
     }
@@ -184,13 +177,12 @@ public class TNTRunMinigame extends Minigame {
 
     @Override
     public void removePlayer(Player p) {
-        if(inGame.contains(p)) inGame.remove(p);
         p.setFlying(false);
         p.setAllowFlight(false);
         p.setInvisible(false);
 
-        if(inGame.size() <= 1 && gameStarted) {
-            winners.addAll(inGame);
+        if(MinigameManager.getNumberInGame() <= 1 && MinigameManager.getGameState().equals(GameState.INGAME)) {
+            winners.addAll(MinigameManager.getIngamePlayers());
             Collections.reverse(winners);
             MinigameManager.gameComplete(winners);
         }
@@ -200,17 +192,17 @@ public class TNTRunMinigame extends Minigame {
     public void onMove(PlayerMoveEvent e) {
         if(e.getTo().getY() < lowestY-1) {
             e.setCancelled(true);
-            if(inGame.contains(e.getPlayer()) && gameStarted) {
-                inGame.remove(e.getPlayer());
+            if(MinigameManager.isInGame(e.getPlayer()) && MinigameManager.getGameState().equals(GameState.INGAME)) {
+                MinigameManager.removeFromGame(e.getPlayer());
                 winners.add(e.getPlayer());
                 addPlayer(e.getPlayer());  
 
-                if(inGame.size() <= 1) {
-                    winners.addAll(inGame);
+                if(MinigameManager.getNumberInGame() <= 1) {
+                    winners.addAll(MinigameManager.getIngamePlayers());
                     Collections.reverse(winners);
                     MinigameManager.gameComplete(winners);
                 }
-            } else if (!inGame.contains(e.getPlayer())) {
+            } else if (!MinigameManager.isInGame(e.getPlayer())) {
                 e.setCancelled(false);
                 addPlayer(e.getPlayer());
             
@@ -218,7 +210,7 @@ public class TNTRunMinigame extends Minigame {
             } else {
                 addPlayer(e.getPlayer());
             }
-        } else if (inGame.contains(e.getPlayer()) && gameStarted) {
+        } else if (MinigameManager.isInGame(e.getPlayer()) && MinigameManager.getGameState().equals(GameState.INGAME)) {
 
             Block breakBlocks[] = new Block[9];
             // get blocks all around where the player is standing
@@ -253,13 +245,13 @@ public class TNTRunMinigame extends Minigame {
     @Override
     public final List<String> getScoreboardLinesLines(Player p) {
         List<String> retVal = new ArrayList<String>();
-        if(inGame.contains(p)) {
+        if(MinigameManager.isInGame(p)) {
             retVal.add("&bYou are &aalive");
         } else {
             retVal.add("&bYou are &cdead");
         }
-        retVal.add("&bPlayers left: &f" + inGame.size());
-        for(Player ingamePlayer : inGame) {
+        retVal.add("&bPlayers left: &f" + MinigameManager.getNumberInGame());
+        for(Player ingamePlayer : MinigameManager.getIngamePlayers()) {
             retVal.add("&a" + ingamePlayer.getDisplayName());
         }
 

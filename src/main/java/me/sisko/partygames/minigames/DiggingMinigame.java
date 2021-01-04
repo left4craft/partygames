@@ -19,6 +19,7 @@ import me.sisko.partygames.Main;
 import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
+import me.sisko.partygames.util.MinigameManager.GameState;
 
 public class DiggingMinigame extends Minigame {
 
@@ -32,9 +33,7 @@ public class DiggingMinigame extends Minigame {
     private List<Location> spawns;
     private double lowestY;
 
-    private List<Player> inGame;
     private List<Player> winners;
-    private boolean gameStarted;
 
     private Leaderboard leaderboard;
 
@@ -86,8 +85,6 @@ public class DiggingMinigame extends Minigame {
     public void initialize() {
         Random rng = new Random();
         winners = new ArrayList<Player>();
-        inGame = new ArrayList<Player>();
-        gameStarted = false;
 
         // build all the stacks
         for(int y = 0; y < height; y++) {
@@ -111,8 +108,7 @@ public class DiggingMinigame extends Minigame {
         
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
-            
-            inGame.add(p);
+
             p.teleportAsync(spawns.get(i));
             p.setGameMode(GameMode.SURVIVAL);
             p.getInventory().clear();
@@ -128,12 +124,10 @@ public class DiggingMinigame extends Minigame {
 
     @Override
     public void start() {
-        gameStarted = true;
     }
 
     @Override
     public void postgame() {
-        gameStarted = false;
     }
 
     @Override
@@ -141,7 +135,6 @@ public class DiggingMinigame extends Minigame {
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.getInventory().clear();
         }
-        inGame.clear();
         winners.clear();
     }
 
@@ -157,20 +150,19 @@ public class DiggingMinigame extends Minigame {
 
     @Override
     public void removePlayer(Player p) {
-        if(inGame.contains(p)) inGame.remove(p);
-        if(inGame.size() == 0 && gameStarted) {
+        if(MinigameManager.getNumberInGame() == 0 && MinigameManager.getGameState().equals(GameState.INGAME)) {
             MinigameManager.gameComplete(winners);
         }
     }
 
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        if(inGame.contains(e.getPlayer())) {
+        if(MinigameManager.isInGame(e.getPlayer())) {
             boolean allowed = false;
             for (Material m : block_types) {
                 if(e.getBlock().getType() == m) allowed = true;
             }
-            allowed = allowed && gameStarted;
+            allowed = allowed && MinigameManager.getGameState().equals(GameState.INGAME);
 
             if(allowed) {
                 e.setCancelled(false);
@@ -180,9 +172,9 @@ public class DiggingMinigame extends Minigame {
                 if(e.getBlock().getLocation().getY()-0.5 <= lowestY) {
                     e.getPlayer().teleport(winnerLocation);
                     e.getPlayer().getInventory().clear();
-                    inGame.remove(e.getPlayer());
+                    MinigameManager.removeFromGame(e.getPlayer());
                     winners.add(e.getPlayer());
-                    if(gameStarted && (inGame.size() == 0 || winners.size() >= 3)) {
+                    if(MinigameManager.getGameState().equals(GameState.INGAME) && (MinigameManager.getNumberInGame() == 0 || winners.size() >= 3)) {
                         MinigameManager.gameComplete(winners);
                     }
                 }

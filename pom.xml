@@ -86,7 +86,7 @@
 		<dependency>
 	    	<groupId>me.missionary</groupId>
 	    	<artifactId>board</artifactId>
-	    	<version>left4craft-1.1</version>
+	    	<version>left4craft-1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

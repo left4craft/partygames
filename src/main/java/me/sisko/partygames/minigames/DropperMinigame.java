@@ -17,14 +17,13 @@ import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
 import me.sisko.partygames.util.MinigameManager;
+import me.sisko.partygames.util.MinigameManager.GameState;
 
 public class DropperMinigame extends Minigame {
 
     private Location spawn;
 
-    private List<Player> inGame;
     private List<Player> winners;
-    private boolean gameStarted;
 
     @Override
     public final boolean jsonValid(final JSONObject json) {
@@ -53,7 +52,6 @@ public class DropperMinigame extends Minigame {
 
     @Override
     public void initialize() {
-        inGame = new ArrayList<Player>();
         winners = new ArrayList<Player>();
 
         MinigameManager.initializationComplete();
@@ -64,7 +62,6 @@ public class DropperMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            inGame.add(p);
             p.teleportAsync(spawn);
             p.setGameMode(GameMode.SURVIVAL);
         }
@@ -73,17 +70,14 @@ public class DropperMinigame extends Minigame {
 
     @Override
     public void start() {
-        gameStarted = true;
     }
 
     @Override
     public void postgame() {
-        gameStarted = false;
     }
 
     @Override
     public void cleanup() {
-        inGame.clear();
         winners.clear();
 
         for(Player p : Bukkit.getOnlinePlayers()) {
@@ -107,12 +101,11 @@ public class DropperMinigame extends Minigame {
 
     @Override
     public void removePlayer(Player p) {
-        if(inGame.contains(p)) inGame.remove(p);
         p.setFlying(false);
         p.setAllowFlight(false);
         p.setInvisible(false);
 
-        if(inGame.size() == 0 && gameStarted) {
+        if(MinigameManager.getNumberInGame() == 0 && MinigameManager.getGameState().equals(GameState.INGAME)) {
             MinigameManager.gameComplete(winners);
         }
     }
@@ -126,15 +119,15 @@ public class DropperMinigame extends Minigame {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if(e.getTo().getBlock().getType().equals(Material.WATER) && gameStarted && inGame.contains(e.getPlayer())) {
+        if(e.getTo().getBlock().getType().equals(Material.WATER) && MinigameManager.getGameState().equals(GameState.INGAME) && MinigameManager.isInGame(e.getPlayer())) {
             winners.add(e.getPlayer());
-            inGame.remove(e.getPlayer());
+            MinigameManager.removeFromGame(e.getPlayer());
             addPlayer(e.getPlayer());
 
-            if(winners.size() == 3 || inGame.size() < 1) {
+            if(winners.size() == 3 || MinigameManager.getNumberInGame() < 1) {
                 MinigameManager.gameComplete(winners);
             }
-        } else if (!gameStarted && e.getTo().getY() < spawn.getY()-1.5) {
+        } else if (!MinigameManager.getGameState().equals(GameState.INGAME) && e.getTo().getY() < spawn.getY()-1.5) {
             e.getPlayer().teleport(spawn);
         }
     }

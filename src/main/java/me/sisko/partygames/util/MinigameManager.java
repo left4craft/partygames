@@ -46,8 +46,9 @@ public class MinigameManager {
         NOGAME
     };
 
-    private static GameState state = GameState.NOGAME;
 
+    private static GameState gameState = GameState.NOGAME;
+    private static List<Player> inGame;
 
     public static void load() {
         File dataFolder = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/games");
@@ -58,6 +59,7 @@ public class MinigameManager {
 
 
         minigames = new HashMap<String, List<Minigame>>();
+        inGame = new ArrayList<Player>();
 
         for (File game : dataFolder.listFiles()) {
             Main.getPlugin().getLogger().info("Loading " + game.getName());
@@ -105,11 +107,11 @@ public class MinigameManager {
     }
 
     public static void playGame(String type) {
-        if(state != GameState.NOGAME) {
+        if(gameState != GameState.NOGAME) {
             Main.getPlugin().getLogger().warning("playGame() called when there is already a game being played!");
             return;
         }
-        state = GameState.INITIALIZING;
+        gameState = GameState.INITIALIZING;
 
         // select a random map, given minigame type
         currentMinigame = minigames.get(type).get(new Random().nextInt(minigames.get(type).size()));
@@ -118,11 +120,13 @@ public class MinigameManager {
 
     // called by the minigame when done initializing
     public static void initializationComplete() {
-        if(state != GameState.INITIALIZING) {
+        if(gameState != GameState.INITIALIZING) {
             Main.getPlugin().getLogger().warning("initializationComplete() called when initialization is already complete!");
             return;
         }
-        state = GameState.PREGAME;
+        gameState = GameState.PREGAME;
+
+        inGame.addAll(Bukkit.getOnlinePlayers());
 
         currentMinigame.prestart(Main.getPlugin().getServer().getOnlinePlayers().stream().collect(Collectors.toList()));
         Bukkit.getPluginManager().registerEvents(currentMinigame, Main.getPlugin());
@@ -134,7 +138,7 @@ public class MinigameManager {
 
         Bukkit.broadcastMessage("Game starting in 10 seconds...");
 
-        new BukkitRunnable(){
+        new BukkitRunnable() {
             @Override
             public void run() {
                 Bukkit.broadcastMessage("Game starting in 3 seconds...");
@@ -167,7 +171,7 @@ public class MinigameManager {
                 timeout.runTaskLater(Main.getPlugin(), currentMinigame.getTimeoutTime());
                 currentMinigame.start();
 
-                state = GameState.INGAME;
+                gameState = GameState.INGAME;
                 endTime = System.currentTimeMillis() + currentMinigame.getTimeoutTime()*1000/20;
             }
         }.runTaskLater(Main.getPlugin(), 10*20);
@@ -176,12 +180,13 @@ public class MinigameManager {
 
     // called by the minigame when it is done running
     public static void gameComplete(final List<Player> winners) {
-        if(state != GameState.INGAME) {
+        if(gameState != GameState.INGAME) {
             Main.getPlugin().getLogger().warning("gameComplete() called when not currently in a game!");
             return;
         }
-        state = GameState.POSTGAME;
+        gameState = GameState.POSTGAME;
 
+        inGame.clear();
         timeout.cancel();
         timeout = null;
         currentMinigame.postgame();     
@@ -221,7 +226,7 @@ public class MinigameManager {
                 HandlerList.unregisterAll(currentMinigame);
                 currentMinigame.cleanup();
                 currentMinigame = null;
-                state = GameState.NOGAME;
+                gameState = GameState.NOGAME;
 
                 for(Player p : Bukkit.getOnlinePlayers()) {
                     FileConfiguration config = Main.getPlugin().getConfig();
@@ -235,7 +240,7 @@ public class MinigameManager {
     }
 
     public static final boolean addPlayer(Player p) {
-        if(inGame()) {
+        if(!gameState.equals(GameState.NOGAME)) {
             currentMinigame.addPlayer(p);
             return true;
         }
@@ -243,19 +248,17 @@ public class MinigameManager {
     }
 
     public static final boolean removePlayer(Player p) {
-        if(inGame()) {
+        if(!gameState.equals(GameState.NOGAME)) {
+            removeFromGame(p);
+            inGame.remove(p);
             currentMinigame.removePlayer(p);
             return true;
         }
         return false;
     }
 
-    public static final boolean inGame() {
-        return currentMinigame != null;
-    }
-
     public static final GameState getGameState() {
-        return state;
+        return gameState;
     }
 
     private static final JSONObject getJson(File f) {
@@ -276,17 +279,17 @@ public class MinigameManager {
         final int seconds = (int) Math.floor((diff%60000) / 1000);
         final String seconds_str = seconds < 10 ? "0" + seconds : "" + seconds;
 
-        if(state == GameState.PREGAME) {
+        if(gameState == GameState.PREGAME) {
             lines.add("&bGame starts: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
             lines.add("&bGame: &f" + currentMinigame.getName());
             lines.add("");
             lines.add("&bMap: &f" + currentMinigame.getMap());
-        } else if (state == GameState.INGAME) {
+        } else if (gameState == GameState.INGAME) {
             lines.add("&bGame finishes: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
             lines.addAll(currentMinigame.getScoreboardLinesLines(p));
-        } else if (state == GameState.POSTGAME) {
+        } else if (gameState == GameState.POSTGAME) {
             lines.add("&bGame ends: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
             lines.add("&bGame: &f" + currentMinigame.getName());
@@ -294,5 +297,21 @@ public class MinigameManager {
             lines.add("&bMap: &f" + currentMinigame.getMap());
         }
         return lines;
+    }
+
+    public static boolean isInGame(Player p) {
+        return inGame.contains(p);
+    }
+
+    public static int getNumberInGame() {
+        return inGame.size();
+    }
+
+    public static void removeFromGame(Player p) {
+        if(inGame.contains(p)) inGame.remove(p);
+    }
+
+    public static List<Player> getIngamePlayers() {
+        return inGame;
     }
 }

@@ -22,6 +22,8 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import me.sisko.partygames.util.MinigameManager;
 import net.md_5.bungee.api.ChatColor;
@@ -33,10 +35,19 @@ is low so that their behavior can be overriden by a regular
 priority listener in the minigame itself.
 */
 public class DefaultListener implements Listener {
-    
+
     @EventHandler(priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent e) {
-        e.getPlayer().setCollidable(false);
+        // Scoreboard sc = e.getPlayer().getScoreboard();
+        // if(sc.getTeam("noCollide") == null) {
+        //     sc.registerNewTeam("noCollide");
+        //     Team setup = sc.getTeam("noCollide");
+        //     setup.setAllowFriendlyFire(true);
+        //     setup.setCanSeeFriendlyInvisibles(true);
+        //     setup.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        // }
+        // Team team = sc.getTeam("noCollide");
+        // team.addEntry(e.getPlayer().getName());
 
         if(!MinigameManager.addPlayer(e.getPlayer())) {
             e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");

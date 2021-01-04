@@ -9,15 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
@@ -31,10 +25,8 @@ public class ParkourMinigame extends Minigame {
     private Location spawn;
     private int minY;
 
-    private List<Player> inGame;
     private List<Player> winners;
     private Map<Player, Location> checkpoints;
-    private boolean gameStarted;
 
     private Material finishMaterial;
 
@@ -78,7 +70,6 @@ public class ParkourMinigame extends Minigame {
 
     @Override
     public void initialize() {
-        inGame = new ArrayList<Player>();
         winners = new ArrayList<Player>();
         checkpoints = new HashMap<Player, Location>();
         MinigameManager.initializationComplete();
@@ -89,7 +80,6 @@ public class ParkourMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             checkpoints.put(p, spawn);
-            inGame.add(p);
             p.teleportAsync(spawn);
             p.setGameMode(GameMode.SURVIVAL);
 
@@ -102,17 +92,14 @@ public class ParkourMinigame extends Minigame {
 
     @Override
     public void start() {
-        gameStarted = true;
     }
 
     @Override
     public void postgame() {
-        gameStarted = false;
     }
 
     @Override
     public void cleanup() {
-        inGame.clear();
         winners.clear();
 
         for(Player p : Bukkit.getOnlinePlayers()) {
@@ -138,14 +125,13 @@ public class ParkourMinigame extends Minigame {
 
     @Override
     public void removePlayer(Player p) {
-        if(inGame.contains(p)) inGame.remove(p);
         p.setFlying(false);
         p.setAllowFlight(false);
         p.setInvisible(false);
 
         p.getInventory().setBoots(new ItemStack(Material.AIR));
 
-        if(inGame.size() == 0 && gameStarted) {
+        if(MinigameManager.getNumberInGame() == 0 && MinigameManager.getGameState().equals(GameState.INGAME)) {
             MinigameManager.gameComplete(winners);
         }
     }
@@ -158,22 +144,22 @@ public class ParkourMinigame extends Minigame {
         if(e.getTo().getBlock().getType().equals(finishMaterial) || below.equals(finishMaterial)) {
 
             // if in game set as winner
-            if(gameStarted && inGame.contains(e.getPlayer())) {
+            if(MinigameManager.getGameState().equals(GameState.INGAME) && MinigameManager.isInGame(e.getPlayer())) {
                 winners.add(e.getPlayer());
-                inGame.remove(e.getPlayer());
+                MinigameManager.removeFromGame(e.getPlayer());
             }
 
             // move player back to spawn regardless
             addPlayer(e.getPlayer());
 
-            if(winners.size() == 3 || inGame.size() < 1) {
+            if(winners.size() == 3 || MinigameManager.getNumberInGame() < 1) {
                 MinigameManager.gameComplete(winners);
             }
         
         // prevent players from falling below map
         } else if (e.getTo().getY() < minY) {
             e.getPlayer().sendMessage("You fell below the map");
-            if (inGame.contains(e.getPlayer())) {
+            if (MinigameManager.isInGame(e.getPlayer())) {
                 e.getPlayer().teleport(checkpoints.get(e.getPlayer()));
             } else {
                 e.getPlayer().teleport(spawn);
@@ -184,7 +170,7 @@ public class ParkourMinigame extends Minigame {
             e.getPlayer().teleport(spawn);
         }
         // handle checkpoints
-        else if(inGame.contains(e.getPlayer()) && (e.getTo().getBlock().getType().toString().toLowerCase().contains("pressure_plate") || below.toString().toLowerCase().contains("pressure_plate") || above.toString().toLowerCase().contains("pressure_plate"))) {
+        else if(MinigameManager.isInGame(e.getPlayer()) && (e.getTo().getBlock().getType().toString().toLowerCase().contains("pressure_plate") || below.toString().toLowerCase().contains("pressure_plate") || above.toString().toLowerCase().contains("pressure_plate"))) {
             // make sure checkpoint is actually far away (more than 5 blocks)
             if(checkpoints.get(e.getPlayer()).distance(e.getTo()) > 5) {
                 checkpoints.put(e.getPlayer(), e.getTo());

@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import me.missionary.board.provider.BoardProvider;
+import me.sisko.partygames.util.MinigameManager.GameState;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -27,7 +28,7 @@ public class ScoreboardProvider implements BoardProvider {
         lines.add("&amc.left4craft.org");
         lines.add(getRainbowDashes(20));
 
-        if(MinigameManager.inGame()) {
+        if(!MinigameManager.getGameState().equals(GameState.NOGAME)) {
             lines.addAll(MinigameManager.getScoreboardLines(player));
         } else {
             lines.add("&bPlayers: &f" + Bukkit.getOnlinePlayers().size() + "/8");
