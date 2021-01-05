@@ -6,13 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
-import me.missionary.board.board.BoardEntry;
 import me.sisko.partygames.minigames.Minigame;
-import me.sisko.partygames.util.Leaderboard.PlayerScore;
 
 public class ChatSender {
     public static final String PREFIX = ChatColor.GREEN + "PartyGames " + ChatColor.DARK_GREEN + ">> " + ChatColor.GRAY;
