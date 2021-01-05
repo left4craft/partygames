@@ -3,6 +3,11 @@ package me.sisko.partygames.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Map;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Collections;
 /*
 
 Class representing a maze.
@@ -61,7 +66,7 @@ public class Maze {
                 travY++;
             }
             int currentIdx = randY * this.getWidth() + randX;
-            int travIdx = travY * * this.getWidth() + travX;
+            int travIdx = travY * this.getWidth() + travX;
             if((travX >= 0 && travX < this.getWidth()) && (travY >= 0 && travY < this.getHeight()) && !canTravel(randX, randY, dir)) {
                 if(path_.find(currentIdx) != path_.find(travIdx)) {
                     setWall(randX, randY, dir, false);
@@ -121,9 +126,77 @@ public class Maze {
     3 = up
     */
     public final List<Integer> getSolution() {
-        return new ArrayList<Integer>();
+        ArrayList<Integer> longest = new ArrayList<Integer>();
+        ArrayList<Integer> potential = new ArrayList<Integer>();
+        Map<Integer, Integer> mazeMap = getSolutionBFS();
+
+        for(int i = 0; i < this.getWidth(); i++) {
+            int lastRow = (this.getHeight()-1) * this.getWidth() + i;
+            potential.clear();
+            while(lastRow != 0) {
+                int temp = mazeMap.get(lastRow);
+                int dirDiff = lastRow-temp;
+
+                if(dirDiff == 1) {
+                    potential.add(0);
+                }
+                //Down
+                if(dirDiff == this.getWidth()) {
+                    potential.add(1);
+                }
+                //Left
+                if(dirDiff == -1) {
+                    potential.add(2);
+                }
+                //Up
+                if(dirDiff == -this.getWidth()) {
+                    potential.add(3);
+                }
+                lastRow = temp;
+            }
+            if(potential.size() > longest.size()) {
+                longest = potential;
+            }
+        }
+        Collections.reverse(longest);
+        return longest;
     }
     
+    private Map<Integer, Integer> getSolutionBFS() {
+        Map<Integer, Integer> outMap = new HashMap<Integer, Integer>();
+        Queue<Integer> BFS = new LinkedList<Integer>();
+        BFS.add(0);
+        outMap.put(0, -1);
+
+        while(BFS.peek() != null) {
+            int temp = BFS.remove();
+            int x = temp%this.getWidth();
+            int y = temp%this.getWidth();
+            int rightIndex = y*this.getWidth()+(x+1);
+            int downIndex = (y+1)*this.getWidth()+x;
+            int leftIndex = y*this.getWidth()+(x-1);
+            int upIndex = (y-1)*this.getWidth()+x;
+
+            if(canTravel(x, y, 0) && outMap.get(temp) != rightIndex) {
+                outMap.put(rightIndex, temp);
+                BFS.add(rightIndex);
+            }
+            if(canTravel(x, y, 1) && outMap.get(temp) != downIndex) {
+                outMap.put(downIndex, temp);
+                BFS.add(downIndex);
+            }
+            if(canTravel(x, y, 2) && outMap.get(temp) != leftIndex) {
+                outMap.put(leftIndex, temp);
+                BFS.add(leftIndex);
+            }
+            if(canTravel(x, y, 3) && outMap.get(temp) != upIndex) {
+                outMap.put(upIndex, temp);
+                BFS.add(upIndex);
+            }
+        }
+        return outMap;
+    }
+
     public final int getHeight() {
         return height;
     }
