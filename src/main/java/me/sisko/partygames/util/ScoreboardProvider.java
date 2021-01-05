@@ -25,19 +25,16 @@ public class ScoreboardProvider implements BoardProvider {
     @Override
     public List<String> getLines(Player player) {
         List<String> lines = new ArrayList<>();
-        lines.add("&amc.left4craft.org");
-        lines.add(getRainbowDashes(20));
+        //lines.add("&amc.left4craft.org");
+        lines.add(getRainbowDashes(25));
 
         if(!MinigameManager.getGameState().equals(GameState.NOGAME)) {
             lines.addAll(MinigameManager.getScoreboardLines(player));
-        } else {
-            lines.add("&bPlayers: &f" + Bukkit.getOnlinePlayers().size() + "/8");
-            lines.add("");
-            lines.add("&bWins: &f5");
-            lines.add("");
-            lines.add("&bPoints: &f432");
-        }
-        lines.add(getRainbowDashes(20));
+        } 
+        
+        lines.addAll(MinigameRotator.getScoreboardLines(player));
+
+        lines.add(getRainbowDashes(25));
         return lines;
     }
 

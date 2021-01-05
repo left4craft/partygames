@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameManager.GameState;
 
@@ -30,10 +31,10 @@ public class ParkourMinigame extends Minigame {
 
     private Material finishMaterial;
 
-    @Override
-    public final long getTimeoutTime() {
-        return 20*60*8;
-    }
+    // @Override
+    // public final long getTimeoutTime() {
+    //     return 20*60*8;
+    // }
 
     @Override
     public final boolean jsonValid(final JSONObject json) {
@@ -145,6 +146,7 @@ public class ParkourMinigame extends Minigame {
 
             // if in game set as winner
             if(MinigameManager.getGameState().equals(GameState.INGAME) && MinigameManager.isInGame(e.getPlayer())) {
+                ChatSender.tell(e.getPlayer(), "You beat the parkour");
                 winners.add(e.getPlayer());
                 MinigameManager.removeFromGame(e.getPlayer());
             }
@@ -158,7 +160,6 @@ public class ParkourMinigame extends Minigame {
         
         // prevent players from falling below map
         } else if (e.getTo().getY() < minY) {
-            e.getPlayer().sendMessage("You fell below the map");
             if (MinigameManager.isInGame(e.getPlayer())) {
                 e.getPlayer().teleport(checkpoints.get(e.getPlayer()));
             } else {
@@ -174,7 +175,7 @@ public class ParkourMinigame extends Minigame {
             // make sure checkpoint is actually far away (more than 5 blocks)
             if(checkpoints.get(e.getPlayer()).distance(e.getTo()) > 5) {
                 checkpoints.put(e.getPlayer(), e.getTo());
-                e.getPlayer().sendMessage("Checkpoint reached!");
+                ChatSender.tell(e.getPlayer(), "Checkpoint reached");
 
                 if(e.getTo().getBlock().getType().equals(Material.CRIMSON_PRESSURE_PLATE) || below.equals(Material.CRIMSON_PRESSURE_PLATE) || above.equals(Material.CRIMSON_PRESSURE_PLATE)) {
                     ItemStack enchanted = new ItemStack(Material.NETHERITE_BOOTS);
@@ -208,7 +209,7 @@ public class ParkourMinigame extends Minigame {
     // }
 
     @Override
-    public final List<String> getScoreboardLinesLines(Player p) {
+    public final List<String> getScoreboardLines(Player p) {
         List<String> retVal = new ArrayList<String>();
         if(winners.contains(p)) {
             retVal.add("&bYou have &acompleted&b the parkour");

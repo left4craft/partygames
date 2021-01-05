@@ -38,6 +38,19 @@ public class Leaderboard {
         }
     }
 
+    public void addPlayer(final Player p) {
+        scores.add(new PlayerScore(p));
+    }
+
+    public void removePlayer(final Player p) {
+        for(int i = 0; i < scores.size(); i++) {
+            if(scores.get(i).getPlayer().getUniqueId().equals(p.getUniqueId())) {
+                scores.remove(i);
+                return;
+            }
+        }
+    }
+
     public void changeScore(final Player player, final int delta) {
         for(final PlayerScore score : scores) {
             if(score.getPlayer().getUniqueId().equals(player.getUniqueId())) {

@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameManager.GameState;
 
@@ -123,6 +124,7 @@ public class DropperMinigame extends Minigame {
             winners.add(e.getPlayer());
             MinigameManager.removeFromGame(e.getPlayer());
             addPlayer(e.getPlayer());
+            ChatSender.tell(e.getPlayer(), "You beat the dropper");
 
             if(winners.size() == 3 || MinigameManager.getNumberInGame() < 1) {
                 MinigameManager.gameComplete(winners);
@@ -133,7 +135,7 @@ public class DropperMinigame extends Minigame {
     }
 
     @Override
-    public final List<String> getScoreboardLinesLines(Player p) {
+    public final List<String> getScoreboardLines(Player p) {
         List<String> retVal = new ArrayList<String>();
         if(winners.contains(p)) {
             retVal.add("&bYou have &acompleted&b the dropper");

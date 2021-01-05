@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameManager.GameState;
 
@@ -158,6 +159,7 @@ public class SpleefMinigame extends Minigame {
                 MinigameManager.removeFromGame(e.getPlayer());
                 winners.add(e.getPlayer());
                 addPlayer(e.getPlayer());  
+                ChatSender.tell(e.getPlayer(), "You died");
 
                 if(MinigameManager.getNumberInGame() <= 1) {
                     winners.addAll(MinigameManager.getIngamePlayers());
@@ -172,7 +174,7 @@ public class SpleefMinigame extends Minigame {
     }
 
     @Override
-    public final List<String> getScoreboardLinesLines(Player p) {
+    public final List<String> getScoreboardLines(Player p) {
         List<String> retVal = new ArrayList<String>();
         if(MinigameManager.isInGame(p)) {
             retVal.add("&bYou are &aalive");

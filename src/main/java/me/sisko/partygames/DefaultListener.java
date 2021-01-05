@@ -22,10 +22,9 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import me.sisko.partygames.util.MinigameManager;
+import me.sisko.partygames.util.MinigameRotator;
 import net.md_5.bungee.api.ChatColor;
 
 /*
@@ -49,10 +48,15 @@ public class DefaultListener implements Listener {
         // Team team = sc.getTeam("noCollide");
         // team.addEntry(e.getPlayer().getName());
 
+        MinigameRotator.onJoin(e.getPlayer());
+
         if(!MinigameManager.addPlayer(e.getPlayer())) {
             e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");
             e.getPlayer().setGameMode(GameMode.SURVIVAL);
             e.getPlayer().getInventory().clear();
+            e.getPlayer().setGlowing(false);
+            e.getPlayer().setAllowFlight(false);
+
             FileConfiguration config = Main.getPlugin().getConfig();
             e.getPlayer().teleport(new Location(Main.getWorld(), config.getDouble("spawn.x"), 
                 config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
@@ -62,6 +66,8 @@ public class DefaultListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onLeave(PlayerQuitEvent e) {
+        MinigameRotator.onLeave(e.getPlayer());
+
         MinigameManager.removePlayer(e.getPlayer());
     }
 

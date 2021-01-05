@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
@@ -150,6 +151,8 @@ public class DiggingMinigame extends Minigame {
 
     @Override
     public void removePlayer(Player p) {
+        if(leaderboard.contains(p)) leaderboard.removePlayer(p);
+
         if(MinigameManager.getNumberInGame() == 0 && MinigameManager.getGameState().equals(GameState.INGAME)) {
             MinigameManager.gameComplete(winners);
         }
@@ -174,12 +177,13 @@ public class DiggingMinigame extends Minigame {
                     e.getPlayer().getInventory().clear();
                     MinigameManager.removeFromGame(e.getPlayer());
                     winners.add(e.getPlayer());
+                    ChatSender.tell(e.getPlayer(), "You finished digging all the blocks");
                     if(MinigameManager.getGameState().equals(GameState.INGAME) && (MinigameManager.getNumberInGame() == 0 || winners.size() >= 3)) {
                         MinigameManager.gameComplete(winners);
                     }
                 }
 
-                // not sure why this is needed, but it destroys the last block
+                // Needed because spartan blocks the breaking of the last block
                 e.getBlock().setType(Material.AIR);
             }
         } else {
@@ -188,7 +192,7 @@ public class DiggingMinigame extends Minigame {
     }
 
     @Override
-    public final List<String> getScoreboardLinesLines(Player p) {
+    public final List<String> getScoreboardLines(Player p) {
         List<String> retVal = new ArrayList<String>();
         if(leaderboard.contains(p)) {
             retVal.add("&bYou are in &f" + leaderboard.getPlace(p) + "&b place");

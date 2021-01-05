@@ -19,7 +19,6 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
-        getLogger().info("Hello World!");
         getCommand("play").setExecutor(new playCommand());
         
         manager = new BoardManager(this, new BoardSettings(new ScoreboardProvider(), ScoreDirection.UP));

@@ -84,5 +84,5 @@ public abstract class Minigame implements Listener {
     public abstract void removePlayer(Player p);
 
     // return up to 10 lines to be displayed on the scoreboard along with other info
-    public abstract List<String> getScoreboardLinesLines(Player p);
+    public abstract List<String> getScoreboardLines(Player p);
 }

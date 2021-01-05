@@ -25,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameManager.GameState;
 
@@ -129,6 +130,10 @@ public class TNTRunMinigame extends Minigame {
         };
 
         floorDecay.runTaskTimer(Main.getPlugin(), 0, 20);
+
+        for(Player p : MinigameManager.getIngamePlayers()) {
+            breakBlocksAtFeet(p);
+        }
     }
 
     @Override
@@ -195,7 +200,8 @@ public class TNTRunMinigame extends Minigame {
             if(MinigameManager.isInGame(e.getPlayer()) && MinigameManager.getGameState().equals(GameState.INGAME)) {
                 MinigameManager.removeFromGame(e.getPlayer());
                 winners.add(e.getPlayer());
-                addPlayer(e.getPlayer());  
+                addPlayer(e.getPlayer());
+                ChatSender.tell(e.getPlayer(), "You died");
 
                 if(MinigameManager.getNumberInGame() <= 1) {
                     winners.addAll(MinigameManager.getIngamePlayers());
@@ -212,38 +218,13 @@ public class TNTRunMinigame extends Minigame {
             }
         } else if (MinigameManager.isInGame(e.getPlayer()) && MinigameManager.getGameState().equals(GameState.INGAME)) {
 
-            Block breakBlocks[] = new Block[9];
-            // get blocks all around where the player is standing
-            // such that it is impossible for player to stay in one place
-            for(int i = 0; i < 9; i++) {
-                breakBlocks[i] = e.getPlayer().getLocation().add(((i%3)-1)/2, -0.5, (Math.floor(i/3)-1)/2).getBlock();
-            }
-
-            // @TODO make block types configurable
-            // also need to change the initialize() method
-            for(Block below : breakBlocks) {
-                if(below.getType().equals(Material.RED_SANDSTONE)) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            below.setType(Material.ORANGE_TERRACOTTA);
-                        }
-                    }.runTaskLater(Main.getPlugin(), 10);
-                
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            below.setType(Material.AIR);
-                        }
-                    }.runTaskLater(Main.getPlugin(), 20);
-                }
-            }
-        // after game ends, winner falls down
+            breakBlocksAtFeet(e.getPlayer());
+            // after game ends, winner falls down
         }
     }
 
     @Override
-    public final List<String> getScoreboardLinesLines(Player p) {
+    public final List<String> getScoreboardLines(Player p) {
         List<String> retVal = new ArrayList<String>();
         if(MinigameManager.isInGame(p)) {
             retVal.add("&bYou are &aalive");
@@ -256,5 +237,35 @@ public class TNTRunMinigame extends Minigame {
         }
 
         return retVal;
-    } 
+    }
+
+    private void breakBlocksAtFeet(Player p ) {
+        Block breakBlocks[] = new Block[9];
+        // get blocks all around where the player is standing
+        // such that it is impossible for player to stay in one place
+        for(int i = 0; i < 9; i++) {
+            breakBlocks[i] = p.getLocation().add(((i%3)-1)*0.75, -0.5, (Math.floor(i/3)-1)*0.75).getBlock();
+        }
+
+        // @TODO make block types configurable
+        // also need to change the initialize() method
+        for(Block below : breakBlocks) {
+            if(below.getType().equals(Material.RED_SANDSTONE)) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        below.setType(Material.ORANGE_TERRACOTTA);
+                    }
+                }.runTaskLater(Main.getPlugin(), 10);
+            
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        below.setType(Material.AIR);
+                    }
+                }.runTaskLater(Main.getPlugin(), 20);
+            }
+        }
+
+    }
 }

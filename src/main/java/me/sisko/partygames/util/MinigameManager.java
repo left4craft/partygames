@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -26,6 +27,7 @@ import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
+import me.sisko.partygames.util.ChatSender.ChatSound;
 
 public class MinigameManager {
     // maps a string, representing the minigame type, to a list
@@ -102,8 +104,8 @@ public class MinigameManager {
         return minigames.containsKey(type);
     }
 
-    public static final String[] getTypes() {
-        return minigames.keySet().stream().toArray(String[]::new);
+    public static final List<String> getTypes() {
+        return minigames.keySet().stream().collect(Collectors.toList());
     }
 
     public static void playGame(String type) {
@@ -128,6 +130,7 @@ public class MinigameManager {
 
         inGame.addAll(Bukkit.getOnlinePlayers());
 
+        ChatSender.broadcastMinigame(currentMinigame);
         currentMinigame.prestart(Main.getPlugin().getServer().getOnlinePlayers().stream().collect(Collectors.toList()));
         Bukkit.getPluginManager().registerEvents(currentMinigame, Main.getPlugin());
     }
@@ -136,30 +139,30 @@ public class MinigameManager {
     public static void prestartComplete() {
         endTime = System.currentTimeMillis() + 10*1000;
 
-        Bukkit.broadcastMessage("Game starting in 10 seconds...");
+        ChatSender.broadcast("Game starting in 10 seconds...");
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game starting in 3 seconds...");
+                ChatSender.broadcast("Game starting in 3 seconds...", ChatSound.COUNTDOWN);
             }
         }.runTaskLater(Main.getPlugin(), 7*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game starting in 2 seconds...");
+                ChatSender.broadcast("Game starting in 2 seconds...", ChatSound.COUNTDOWN);
             }
         }.runTaskLater(Main.getPlugin(), 8*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game starting in 1 seconds...");
+                ChatSender.broadcast("Game starting in 1 seconds...", ChatSound.COUNTDOWN);
             }
         }.runTaskLater(Main.getPlugin(), 9*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game started!");
+                ChatSender.broadcast("Game started!", ChatSound.START);
 
                 timeout = new BukkitRunnable(){
                     @Override
@@ -187,60 +190,81 @@ public class MinigameManager {
         gameState = GameState.POSTGAME;
 
         inGame.clear();
-        timeout.cancel();
+        if(timeout != null) timeout.cancel();
         timeout = null;
         currentMinigame.postgame();     
         endTime = System.currentTimeMillis() + 10*1000;
 
-        Bukkit.broadcastMessage("Minigame " + currentMinigame.getName() + " complete!");
-        Bukkit.broadcastMessage("Map: " + currentMinigame.getMap());
-        Bukkit.broadcastMessage("Winners: ");
-        for(int i = 0; i < winners.size(); i++) {
-            Bukkit.broadcastMessage(winners.get(i).getDisplayName());
-        }
+        ChatSender.broadcastWinners(currentMinigame, winners);
 
-        Bukkit.broadcastMessage("Game ending in 10 seconds...");
-        
-        new BukkitRunnable(){
+        MinigameRotator.updatePoints(winners);
+        // for(int i = 0; i < winners.size(); i++) {
+        //     Bukkit.broadcastMessage(winners.get(i).getDisplayName());
+        // }
+
+        ChatSender.broadcast("Game ending in 10 seconds...");
+
+        new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game ending in 3 seconds...");
+                ChatSender.broadcast("Game ending in 3 seconds...");
             }
         }.runTaskLater(Main.getPlugin(), 7*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game ending in 2 seconds...");
+                ChatSender.broadcast("Game ending in 2 seconds...");
             }
         }.runTaskLater(Main.getPlugin(), 8*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game ending in 1 seconds...");
+                ChatSender.broadcast("Game ending in 1 seconds...");
             }
         }.runTaskLater(Main.getPlugin(), 9*20);
         new BukkitRunnable(){
             @Override
             public void run() {
-                Bukkit.broadcastMessage("Game ended!");
+                // because winners is deleted by minigame.cleanup()
+
+                ChatSender.broadcast("Game ended!");
                 HandlerList.unregisterAll(currentMinigame);
                 currentMinigame.cleanup();
                 currentMinigame = null;
                 gameState = GameState.NOGAME;
 
                 for(Player p : Bukkit.getOnlinePlayers()) {
-                    FileConfiguration config = Main.getPlugin().getConfig();
-                    p.teleport(new Location(Main.getWorld(), config.getDouble("spawn.x"), 
-                        config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
-                        (float) config.getDouble("spawn.pitch")));
+
+                    // sanity checks to make sure player not in any wierd state
+                    if(p.getAllowFlight()) {
+                        p.setFlying(false);
+                        p.setAllowFlight(false);
+                    }
+                    p.setGameMode(GameMode.SURVIVAL);
+                    p.setInvisible(false);
+                    p.setGlowing(false);
+                    p.getInventory().clear();
+
+
                 }
+                MinigameRotator.gameComplete();
+
 
             }
         }.runTaskLater(Main.getPlugin(), 10*20);
     }
 
+    public static void forceEndGame() {
+        if(gameState.equals(GameState.NOGAME)) return;
+
+        if(timeout != null) timeout.cancel();
+        timeout = null;
+        gameComplete(currentMinigame.timeout());
+    }
+
     public static final boolean addPlayer(Player p) {
         if(!gameState.equals(GameState.NOGAME)) {
+            ChatSender.tell(p, "You joined a game in progress, so you are being added as a spectator. You will be able to play in the next game.");
             currentMinigame.addPlayer(p);
             return true;
         }
@@ -282,19 +306,19 @@ public class MinigameManager {
         if(gameState == GameState.PREGAME) {
             lines.add("&bGame starts: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
-            lines.add("&bGame: &f" + currentMinigame.getName());
-            lines.add("");
-            lines.add("&bMap: &f" + currentMinigame.getMap());
+            //lines.add("&bGame: &f" + currentMinigame.getName());
+            //lines.add("");
+            //lines.add("&bMap: &f" + currentMinigame.getMap());
         } else if (gameState == GameState.INGAME) {
             lines.add("&bGame finishes: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
-            lines.addAll(currentMinigame.getScoreboardLinesLines(p));
+            lines.addAll(currentMinigame.getScoreboardLines(p));
         } else if (gameState == GameState.POSTGAME) {
             lines.add("&bGame ends: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             lines.add("");
-            lines.add("&bGame: &f" + currentMinigame.getName());
-            lines.add("");
-            lines.add("&bMap: &f" + currentMinigame.getMap());
+            //lines.add("&bGame: &f" + currentMinigame.getName());
+            //lines.add("");
+            //lines.add("&bMap: &f" + currentMinigame.getMap());
         }
         return lines;
     }
