@@ -86,12 +86,29 @@ public class MinigameRotator {
         rotating = true;
     }
 
+    public static void forceStartRotation(List<String> games) {
+
+        // make a deep copy
+        minigames = new ArrayList<String>();
+        minigames.addAll(games);
+        leaderboard = new Leaderboard(Bukkit.getOnlinePlayers().stream().collect(Collectors.toList()));
+        
+        if(startGameRunnable != null) {
+            startGameRunnable.cancel();
+        }
+        
+        currentMinigame = 0;
+        MinigameManager.playGame(minigames.get(currentMinigame));
+        rotating = true;
+    }
+
     public static void updatePoints(final List<Player> winners) {
         final int size = winners.size();
         if(size > 0) leaderboard.changeScore(winners.get(0), 3);
         if(size > 1) leaderboard.changeScore(winners.get(1), 2);
         if(size > 2) leaderboard.changeScore(winners.get(2), 1);
     }
+    
 
     public static void gameComplete() {
         if(!MinigameManager.getGameState().equals(MinigameManager.GameState.NOGAME)) {
@@ -106,6 +123,9 @@ public class MinigameRotator {
         currentMinigame++;
         if(currentMinigame < minigames.size() && Bukkit.getOnlinePlayers().size() >= MIN_PLAYERS) {
             MinigameManager.playGame(minigames.get(currentMinigame));
+
+        // either this is the last minigame
+        // or there are not enough players
         } else {
 
             rotating = false;
@@ -124,6 +144,9 @@ public class MinigameRotator {
             // start the rotation for the next game
             // must check for min players, because it is possible for the 
             // game end to be triggered by leaving players
+
+            // this is also where leaderboard calculations should take place
+            // because leaderboards are only updated when a rotation finishes with all players
             if (Bukkit.getOnlinePlayers().size() >= MIN_PLAYERS) {
                 //if(startGameRunnable != null) startGameRunnable.cancel();
                 startTime = System.currentTimeMillis() + 30 * 1000;
@@ -135,6 +158,8 @@ public class MinigameRotator {
                 };
             
                 startGameRunnable.runTaskLater(Main.getPlugin(), 20 * 30);
+            } else {
+                ChatSender.broadcast("The games were ended early because there are fewer than " + MIN_PLAYERS + " online");
             }
         }
     }
@@ -165,7 +190,7 @@ public class MinigameRotator {
             } else {
                 retVal.add("&bYou are spectating");
             }
-            retVal.add("&b&nLeaderboard");
+            retVal.add("&b&nOverall Leaderboard");
     
             for(final PlayerScore score : leaderboard.getLeaderboard()) {
                 retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());

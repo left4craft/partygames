@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -26,6 +24,7 @@ import me.sisko.partygames.minigames.DropperMinigame;
 import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
+import me.sisko.partygames.minigames.SumoMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
 import me.sisko.partygames.util.ChatSender.ChatSound;
 
@@ -80,6 +79,8 @@ public class MinigameManager {
                 m = new SpleefMinigame();
             } else if(type.equals("parkour")) {
                 m = new ParkourMinigame();
+            } else if(type.equals("sumo")) {
+                m = new SumoMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly

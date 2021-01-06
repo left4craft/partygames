@@ -17,3 +17,6 @@ Spleef
 
 Parkour
 500 170 500
+
+Sumo
+-1000 40 0

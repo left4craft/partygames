@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 public class Leaderboard {
     private List<PlayerScore> scores;
+    private boolean reversed;
 
     public class PlayerScore {
         private Player player;
@@ -36,6 +37,27 @@ public class Leaderboard {
         for(final Player p : players) {
             scores.add(new PlayerScore(p));
         }
+        this.reversed = false;
+    }
+
+    public Leaderboard(final List<Player> players, boolean reversed) {
+        scores = new ArrayList<PlayerScore>();
+        for(final Player p : players) {
+            scores.add(new PlayerScore(p));
+        }
+        this.reversed = reversed;
+    }
+
+    public Leaderboard(final List<Player> players, boolean reversed, int initialScore) {
+        scores = new ArrayList<PlayerScore>();
+        for(final Player p : players) {
+            scores.add(new PlayerScore(p));
+        }
+        this.reversed = reversed;
+
+        for(PlayerScore ps : scores) {
+            ps.changScore(initialScore);
+        }
     }
 
     public void addPlayer(final Player p) {
@@ -57,15 +79,26 @@ public class Leaderboard {
                 score.changScore(delta);
 
                 // after incrementing, sort the scores
+                // order in opposite direction depending on whether scoreboard is reversed
                 scores.sort(new Comparator<PlayerScore>(){
                     @Override
                     public int compare(PlayerScore p1, PlayerScore p2) {
-                        return p2.getScore() - p1.getScore();
+                        if(!reversed) return p2.getScore() - p1.getScore();
+                        return p1.getScore() - p2.getScore();
                     } 
                 });
                 return;
             }
         }
+    }
+
+    public int getScore(final Player player) {
+        for(final PlayerScore score : scores) {
+            if(score.getPlayer().getUniqueId().equals(player.getUniqueId())) {
+                return score.getScore();
+            }
+        }
+        return reversed ? 999 : -999;
     }
 
     public final List<PlayerScore> getLeaderboard() {

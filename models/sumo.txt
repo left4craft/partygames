@@ -1,0 +1,16 @@
+name = Sumo
+description = Try to knock others off the platform, but be careful not to fall off yourself!
+map = Lava
+
+type = sumo
+
+death_y n = 39
+number_of_lives n = 5
+weapon = BLAZE_ROD
+weapon_knockback_level n = 1
+spawn
+  x n = -999.5
+  y n = 40.
+  z n = 0.5
+  yaw n = 0
+  pitch n = 0
