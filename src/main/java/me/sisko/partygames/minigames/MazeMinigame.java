@@ -7,16 +7,24 @@ import org.json.JSONObject;
 
 public class MazeMinigame extends Minigame {
 
+    private Location spawn;
+
+    private List<Player> winners;
+
     @Override
     public boolean jsonValid(JSONObject json) {
         // TODO Auto-generated method stub
-        return false;
+        final String[] keys = {"name", "description", "map", "spawn", "end_x", "end_z"};
+        for(final String key : keys) {
+            if(!json.has(key)) return false;
+        }
+        return true;
     }
 
     @Override
     public void setup(JSONObject json) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
@@ -28,7 +36,6 @@ public class MazeMinigame extends Minigame {
     @Override
     public void prestart(List<Player> players) {
         // TODO Auto-generated method stub
-
     }
 
     @Override

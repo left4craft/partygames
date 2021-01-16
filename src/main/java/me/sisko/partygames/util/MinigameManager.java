@@ -27,6 +27,7 @@ import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
+import me.sisko.partygames.minigames.MazeMinigame;
 import me.sisko.partygames.util.ChatSender.ChatSound;
 
 public class MinigameManager {
@@ -80,6 +81,8 @@ public class MinigameManager {
                 m = new SpleefMinigame();
             } else if(type.equals("parkour")) {
                 m = new ParkourMinigame();
+            } else if (type.equals("mase")) {
+                m = new MazeMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly
