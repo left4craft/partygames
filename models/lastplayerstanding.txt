@@ -1,0 +1,56 @@
+name = Last Player Standing
+description = Free-for-all PvP, where the last player left alive wins the game!
+map = Rods
+
+type = lastplayerstanding
+
+number_of_lives n = 3
+
+spawns[0]
+  x n = -507.5
+  y n = 47.5
+  z n = -602.5
+  yaw n = 0
+  pitch n = 0
+spawns[1]
+  x n = -510.5
+  y n = 47.5
+  z n = -571.5
+  yaw n = 180
+  pitch n = 0
+spawns[2]
+  x n = -476.5
+  y n = 47.5
+  z n = -571.5
+  yaw n = 180
+  pitch n = 0
+spawns[3]
+  x n = -503.5
+  y n = 54.5
+  z n = -526.5
+  yaw n = 180
+  pitch n = 0
+spawns[4]
+  x n = -480.5
+  y n = 47.5
+  z n = -640.5
+  yaw n = 0
+  pitch n = 0
+spawns[5]
+  x n = -461.5
+  y n = 47.5
+  z n = -611.5
+  yaw n = 90
+  pitch n = 0
+spawns[6]
+  x n = -444.5
+  y n = 53.5
+  z n = -543.5
+  yaw n = 133
+  pitch n = 0
+spawns[7]
+  x n = -534.5
+  y n = 53.5
+  z n = -658.5
+  yaw n = 0
+  pitch n = 0

@@ -20,3 +20,6 @@ Parkour
 
 Sumo
 -1000 40 0
+
+Last player Standing
+-507 50 -602

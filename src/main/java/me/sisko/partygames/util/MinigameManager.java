@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import me.sisko.partygames.Main;
 import me.sisko.partygames.minigames.DiggingMinigame;
 import me.sisko.partygames.minigames.DropperMinigame;
+import me.sisko.partygames.minigames.LastPlayerStandingMinigame;
 import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
@@ -81,6 +82,8 @@ public class MinigameManager {
                 m = new ParkourMinigame();
             } else if(type.equals("sumo")) {
                 m = new SumoMinigame();
+            } else if(type.equals("lastplayerstanding")) {
+                m = new LastPlayerStandingMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly
@@ -132,6 +135,7 @@ public class MinigameManager {
         inGame.addAll(Bukkit.getOnlinePlayers());
 
         ChatSender.broadcastMinigame(currentMinigame);
+        correctPlayerStates();
         currentMinigame.prestart(Main.getPlugin().getServer().getOnlinePlayers().stream().collect(Collectors.toList()));
         Bukkit.getPluginManager().registerEvents(currentMinigame, Main.getPlugin());
     }
@@ -234,20 +238,7 @@ public class MinigameManager {
                 currentMinigame = null;
                 gameState = GameState.NOGAME;
 
-                for(Player p : Bukkit.getOnlinePlayers()) {
-
-                    // sanity checks to make sure player not in any wierd state
-                    if(p.getAllowFlight()) {
-                        p.setFlying(false);
-                        p.setAllowFlight(false);
-                    }
-                    p.setGameMode(GameMode.SURVIVAL);
-                    p.setInvisible(false);
-                    p.setGlowing(false);
-                    p.getInventory().clear();
-
-
-                }
+                correctPlayerStates();
                 MinigameRotator.gameComplete();
 
 
@@ -338,5 +329,21 @@ public class MinigameManager {
 
     public static List<Player> getIngamePlayers() {
         return inGame;
+    }
+
+    // sanity checks to make sure players are not in some strange state at the start or end of games
+    private static void correctPlayerStates() {
+        for(Player p : Bukkit.getOnlinePlayers()) {
+
+            // sanity checks to make sure player not in any wierd state
+            if(p.getAllowFlight()) {
+                p.setFlying(false);
+                p.setAllowFlight(false);
+            }
+            p.setGameMode(GameMode.SURVIVAL);
+            p.setInvisible(false);
+            p.setGlowing(false);
+            p.getInventory().clear();
+        }
     }
 }
