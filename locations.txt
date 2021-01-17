@@ -22,4 +22,7 @@ Sumo
 -1000 40 0
 
 Last player Standing
--507 50 -602
+-500 50 -500
+
+One in the Chamber
+-500 80 500

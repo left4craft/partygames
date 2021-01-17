@@ -1,0 +1,56 @@
+name = One in the Chamber
+description = You only get one chance to hit your arrow, after which you must fight with your sword
+map = Snow
+
+type = oneinthechamber
+
+kills_to_win n = 10
+
+spawns[0]
+  x n = -462.5
+  y n = 81.5
+  z n = 541.5
+  yaw n = 120
+  pitch n = 0
+spawns[1]
+  x n = -502.5
+  y n = 81.5
+  z n = 531.5
+  yaw n = 180
+  pitch n = 0
+spawns[2]
+  x n = -546.5
+  y n = 79.5
+  z n = 538.5
+  yaw n = 0
+  pitch n = 0
+spawns[3]
+  x n = -547.5
+  y n = 81.5
+  z n = 489.5
+  yaw n = -90
+  pitch n = 0
+spawns[4]
+  x n = -537.5
+  y n = 81.5
+  z n = 458.5
+  yaw n = -30
+  pitch n = 0
+spawns[5]
+  x n = -508.5
+  y n = 80.5
+  z n = 459.5
+  yaw n = 0
+  pitch n = 0
+spawns[6]
+  x n = -468.5
+  y n = 79.5
+  z n = 459.5
+  yaw n = 45
+  pitch n = 0
+spawns[7]
+  x n = -467.5
+  y n = 80.5
+  z n = 483.5
+  yaw n = 90
+  pitch n = 0

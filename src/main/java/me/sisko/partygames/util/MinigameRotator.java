@@ -18,8 +18,8 @@ import me.sisko.partygames.util.MinigameManager.GameState;
 
 
 public class MinigameRotator {
-    public static final int MIN_PLAYERS = 2;
-    public static final int GAMES_PER_ROTATION = 6;
+    public static final int MIN_PLAYERS = 4;
+    public static final int GAMES_PER_ROTATION = 8;
 
     private static boolean rotating = false;
     private static long startTime = 0;

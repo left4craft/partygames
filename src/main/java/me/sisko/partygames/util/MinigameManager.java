@@ -23,6 +23,7 @@ import me.sisko.partygames.minigames.DiggingMinigame;
 import me.sisko.partygames.minigames.DropperMinigame;
 import me.sisko.partygames.minigames.LastPlayerStandingMinigame;
 import me.sisko.partygames.minigames.Minigame;
+import me.sisko.partygames.minigames.OneInTheChamberMinigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.SumoMinigame;
@@ -84,6 +85,8 @@ public class MinigameManager {
                 m = new SumoMinigame();
             } else if(type.equals("lastplayerstanding")) {
                 m = new LastPlayerStandingMinigame();
+            } else if (type.equals("oneinthechamber")) {
+                m = new OneInTheChamberMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly

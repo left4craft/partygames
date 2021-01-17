@@ -1,7 +1,9 @@
 package me.sisko.partygames.minigames;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -14,6 +16,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.projectiles.ProjectileSource;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
@@ -22,6 +28,7 @@ import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
 import me.sisko.partygames.util.MinigameManager.GameState;
+import net.md_5.bungee.api.ChatColor;
 
 public class LastPlayerStandingMinigame extends Minigame {
 
@@ -29,7 +36,7 @@ public class LastPlayerStandingMinigame extends Minigame {
     private int numberOfLives;
 
     private Leaderboard livesRemaining;
-    //private List<Player> winners;
+    private Map<Player, Player> lastHit;
 
 
     @Override
@@ -65,13 +72,14 @@ public class LastPlayerStandingMinigame extends Minigame {
 
     @Override
     public void initialize() {
-        //winners = new ArrayList<Player>();
 
         MinigameManager.initializationComplete();
     }
 
     @Override
     public void prestart(final List<Player> players) {
+        lastHit = new HashMap<Player, Player>();
+
         // leaderboard counting the top number of lives remaining
         // once a player reaches 0 score they are eliminated
         livesRemaining = new Leaderboard(players, false, numberOfLives); 
@@ -80,7 +88,9 @@ public class LastPlayerStandingMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
+            lastHit.put(p, null);
             p.teleportAsync(getRandomSpawn());
+            p.setGlowing(true);
         }
         MinigameManager.prestartComplete();
     }
@@ -109,6 +119,8 @@ public class LastPlayerStandingMinigame extends Minigame {
             p.setFlying(false);
             p.setAllowFlight(false);
             p.setInvisible(false);
+            p.setGlowing(false);
+            p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
             p.getInventory().clear();
             p.setHealth(20);
         }
@@ -131,6 +143,8 @@ public class LastPlayerStandingMinigame extends Minigame {
         p.getInventory().clear();
         p.setHealth(20);
         p.setFireTicks(0);
+        p.setGlowing(false);
+        p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
     }
 
     @Override
@@ -138,6 +152,8 @@ public class LastPlayerStandingMinigame extends Minigame {
         p.setFlying(false);
         p.setAllowFlight(false);
         p.setInvisible(false);
+        p.setGlowing(false);
+        p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
         p.getInventory().clear();
         p.setHealth(20);
 
@@ -155,6 +171,8 @@ public class LastPlayerStandingMinigame extends Minigame {
             final Player damagee = (Player) e.getEntity();
 
             if(MinigameManager.getGameState().equals(MinigameManager.GameState.INGAME) && MinigameManager.isInGame(damager) && MinigameManager.isInGame(damagee)) {
+                lastHit.put(damagee, damager);
+
                 // don't do anything for nonlethal
                 if (damagee.getHealth() - e.getFinalDamage() > 0) {
                     e.setCancelled(false);
@@ -163,22 +181,30 @@ public class LastPlayerStandingMinigame extends Minigame {
 
                 e.setCancelled(true);
 
-                killPlayer(damagee);
+                killPlayer(damager, damagee);
             }
 
         } else if (e.getDamager() instanceof Arrow && e.getEntity() instanceof Player) {
             final Player damagee = (Player) e.getEntity();
-            if(MinigameManager.getGameState().equals(MinigameManager.GameState.INGAME) && MinigameManager.isInGame(damagee)) {
-                // don't do anything for nonlethal
-                if (damagee.getHealth() - e.getFinalDamage() > 0) {
-                    e.setCancelled(false);
-                    return;
+            final Arrow arrow = (Arrow) e.getDamager();
+
+            if(arrow.getShooter() instanceof Player) {
+                final Player damager = (Player) arrow.getShooter();
+                if(MinigameManager.getGameState().equals(MinigameManager.GameState.INGAME) && MinigameManager.isInGame(damagee)) {
+                    lastHit.put(damagee, damager);
+
+                    // don't do anything for nonlethal
+                    if (damagee.getHealth() - e.getFinalDamage() > 0) {
+                        e.setCancelled(false);
+                        return;
+                    }
+    
+                    e.setCancelled(true);
+    
+                    killPlayer(damager, damagee);
                 }
-
-                e.setCancelled(true);
-
-                killPlayer(damagee);
             }
+
 
         }
     }
@@ -189,6 +215,8 @@ public class LastPlayerStandingMinigame extends Minigame {
 
         Player damagee = (Player) e.getEntity();
         if(e.getCause().equals(DamageCause.LAVA)) {
+            damagee.setFireTicks(0);
+
             if(MinigameManager.getGameState().equals(MinigameManager.GameState.INGAME) && MinigameManager.isInGame(damagee)) {
                 // don't do anything for nonlethal
                 if (damagee.getHealth() - e.getFinalDamage() > 0) {
@@ -197,9 +225,7 @@ public class LastPlayerStandingMinigame extends Minigame {
                 }
 
                 e.setCancelled(true);
-                killPlayer(damagee);
-            } else {
-                damagee.setFireTicks(0);
+                killPlayer(null, damagee);
             }
 
         }
@@ -225,7 +251,11 @@ public class LastPlayerStandingMinigame extends Minigame {
         return spawns.get((new Random()).nextInt(spawns.size()));
     }
 
-    private void killPlayer(final Player damagee) {
+    private void killPlayer(Player damager, final Player damagee) {
+        if(damager == null) {
+            damager = lastHit.get(damagee);
+        }
+
         livesRemaining.changeScore(damagee, -1);
         // die if no lives remaining
         if(livesRemaining.getScore(damagee) == 0) {
@@ -239,6 +269,20 @@ public class LastPlayerStandingMinigame extends Minigame {
             damagee.setHealth(20);
             damagee.setFireTicks(0);
             ChatSender.tell(damagee, "You were killed and lost a life");
+        }
+
+        // tell damager they got a kill and increment strength
+        if(damager != null) {
+            ChatSender.tell(damager, "You killed " + damagee.getDisplayName() + ChatColor.GRAY + " and gained increased strength");
+            if(damager.getPotionEffect(PotionEffectType.INCREASE_DAMAGE) == null) {
+                damager.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 0, false, false, true));
+            } else {
+                int amplevel = damager.getPotionEffect(PotionEffectType.INCREASE_DAMAGE).getAmplifier()+1;
+                damager.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+                damager.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, amplevel, false, false, true));
+            }
+            damager.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*10, 1, false, false, true));
+
         }
 
         if(MinigameManager.getNumberInGame() <= 1) {

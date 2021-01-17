@@ -15,12 +15,14 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.sisko.partygames.util.MinigameManager;
@@ -124,6 +126,18 @@ public class DefaultListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityDamage(EntityDamageEvent e) {
         e.setCancelled(true);
+    }
+
+    // disable arrow landing on blocks
+    @EventHandler(priority = EventPriority.LOW)
+    public void onProjectileHit(ProjectileHitEvent e) {
+        e.getEntity().remove();
+    }
+
+    // disable arrow picking up
+    @EventHandler(priority = EventPriority.LOW)
+    public void onProjectilePickup(PlayerPickupArrowEvent e) {
+        e.getArrow().remove();
     }
 
     @EventHandler(priority = EventPriority.LOW)
