@@ -9,6 +9,8 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -117,6 +119,7 @@ public class LastPlayerStandingMinigame extends Minigame {
     public void cleanup() {
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.setFlying(false);
+            p.setCollidable(true);
             p.setAllowFlight(false);
             p.setInvisible(false);
             p.setGlowing(false);
@@ -140,6 +143,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         p.setInvisible(true);
         p.setAllowFlight(true);
         p.setFlying(true);
+        p.setCollidable(false);
         p.getInventory().clear();
         p.setHealth(20);
         p.setFireTicks(0);
@@ -150,6 +154,7 @@ public class LastPlayerStandingMinigame extends Minigame {
     @Override
     public void removePlayer(Player p) {
         p.setFlying(false);
+        p.setCollidable(true);
         p.setAllowFlight(false);
         p.setInvisible(false);
         p.setGlowing(false);
@@ -274,6 +279,8 @@ public class LastPlayerStandingMinigame extends Minigame {
         // tell damager they got a kill and increment strength
         if(damager != null) {
             ChatSender.tell(damager, "You killed " + damagee.getDisplayName() + ChatColor.GRAY + " and gained increased strength");
+            damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1, 0.5f);
+
             if(damager.getPotionEffect(PotionEffectType.INCREASE_DAMAGE) == null) {
                 damager.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 0, false, false, true));
             } else {

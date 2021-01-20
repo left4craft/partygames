@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import me.sisko.partygames.util.Database;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameRotator;
 import net.md_5.bungee.api.ChatColor;
@@ -58,6 +59,8 @@ public class DefaultListener implements Listener {
             e.getPlayer().getInventory().clear();
             e.getPlayer().setGlowing(false);
             e.getPlayer().setAllowFlight(false);
+            e.getPlayer().setCollidable(true);
+            e.getPlayer().getActivePotionEffects().forEach(effect -> e.getPlayer().removePotionEffect(effect.getType()));
 
             FileConfiguration config = Main.getPlugin().getConfig();
             e.getPlayer().teleport(new Location(Main.getWorld(), config.getDouble("spawn.x"), 
@@ -71,6 +74,8 @@ public class DefaultListener implements Listener {
         MinigameRotator.onLeave(e.getPlayer());
 
         MinigameManager.removePlayer(e.getPlayer());
+
+        Database.saveToDb(e.getPlayer());
     }
 
 

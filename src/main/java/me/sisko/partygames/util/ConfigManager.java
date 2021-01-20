@@ -9,13 +9,10 @@ public class ConfigManager {
     public static void load() {
         FileConfiguration config = Main.getPlugin().getConfig();
         File dataFolder = Main.getPlugin().getDataFolder();
-        config.addDefault("sql.host", "127.0.0.1");
-        config.addDefault("sql.database", "data");
-        config.addDefault("sql.port", 3306);
+
+        config.addDefault("sql.url", "jdbc:mysql://ip:port/database");
         config.addDefault("sql.user", "user");
         config.addDefault("sql.pass", "password");
-        config.addDefault("redisip", "ip");
-        config.addDefault("redispass", "secret");
 
         config.addDefault("spawn.x", 0.5);
         config.addDefault("spawn.y", 151.);
@@ -35,6 +32,8 @@ public class ConfigManager {
             Main.getPlugin().getLogger().info("Config.yml found, loading!");
             config.options().copyDefaults(false);
         }
+
+        reload();
     }
 
     public static void reload() {

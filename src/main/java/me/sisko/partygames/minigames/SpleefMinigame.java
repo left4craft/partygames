@@ -166,10 +166,10 @@ public class SpleefMinigame extends Minigame {
                     Collections.reverse(winners);
                     MinigameManager.gameComplete(winners);
                 }
+            // only call addPlayer if the state is in game
             } else {
-                e.setCancelled(false);
-                addPlayer(e.getPlayer());
-            } 
+                e.getPlayer().teleport(spawn);
+            }
         } 
     }
 

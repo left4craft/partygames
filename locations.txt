@@ -6,23 +6,29 @@ Spawn:
 Digging game:
 0 18 500
 
-TNT run:
-0 65 1000
+Parkour:
+500 170 500
 
 Dropper:
 500 211 0
 
-Spleef
--500 65 0
+Quake:
+500 50 -500
 
-Parkour
-500 170 500
-
-Sumo
--1000 40 0
+TODO
+0 50 -500
 
 Last player Standing
 -500 50 -500
 
+Spleef
+-500 65 0
+
 One in the Chamber
 -500 80 500
+
+TNT run:
+0 65 1000
+
+Sumo
+-1000 40 0

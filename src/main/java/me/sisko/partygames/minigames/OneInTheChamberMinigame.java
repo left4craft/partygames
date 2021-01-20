@@ -7,6 +7,8 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -99,6 +101,7 @@ public class OneInTheChamberMinigame extends Minigame {
     public void cleanup() {
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.setFlying(false);
+            p.setCollidable(true);
             p.setAllowFlight(false);
             p.setInvisible(false);
             p.getInventory().clear();
@@ -120,6 +123,7 @@ public class OneInTheChamberMinigame extends Minigame {
         p.setInvisible(true);
         p.setAllowFlight(true);
         p.setFlying(true);
+        p.setCollidable(false);
         p.getInventory().clear();
         p.setHealth(20);
         p.setFireTicks(0);
@@ -128,6 +132,7 @@ public class OneInTheChamberMinigame extends Minigame {
     @Override
     public void removePlayer(Player p) {
         p.setFlying(false);
+        p.setCollidable(true);
         p.setAllowFlight(false);
         p.setInvisible(false);
         p.getInventory().clear();
@@ -197,6 +202,7 @@ public class OneInTheChamberMinigame extends Minigame {
 
         kills.changeScore(damager, 1);
         damager.getInventory().addItem(new ItemStack(Material.ARROW));
+        damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1, 0.5f);
 
         // respawn
         damagee.teleport(getRandomSpawn());

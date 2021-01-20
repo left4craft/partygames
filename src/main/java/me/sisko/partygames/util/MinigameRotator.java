@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import javax.xml.crypto.Data;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -102,11 +105,31 @@ public class MinigameRotator {
         rotating = true;
     }
 
+    // this is called 10 secons before gameComplete(), so currentMinigame still has its correct value
     public static void updatePoints(final List<Player> winners) {
+
+        // for simplicity, increment everyone's game count
+        // in the future this should be changed so players
+        // who joined during a game as spectators don't get
+        // counted here
+        Bukkit.getOnlinePlayers().forEach(p -> Database.addGames(minigames.get(currentMinigame), p, 1));
+
         final int size = winners.size();
-        if(size > 0) leaderboard.changeScore(winners.get(0), 3);
-        if(size > 1) leaderboard.changeScore(winners.get(1), 2);
-        if(size > 2) leaderboard.changeScore(winners.get(2), 1);
+        if(size > 0) {
+            leaderboard.changeScore(winners.get(0), 3);
+            Database.addWins(minigames.get(currentMinigame), winners.get(0), 1);
+            Database.addPoints(minigames.get(currentMinigame), winners.get(0), 3);
+        }
+
+        if(size > 1) {
+            leaderboard.changeScore(winners.get(1), 2);
+            Database.addPoints(minigames.get(currentMinigame), winners.get(1), 2);
+        }
+
+        if(size > 2) {
+            leaderboard.changeScore(winners.get(2), 1);
+            Database.addPoints(minigames.get(currentMinigame), winners.get(2), 1);
+        }
     }
     
 
@@ -140,6 +163,9 @@ public class MinigameRotator {
 
 
             ChatSender.broadcastOVerallWinners(leaderboard);
+
+            // @TODO move this to inside the if statement after testing is complete
+            updateOverallScores(leaderboard);
 
             // start the rotation for the next game
             // must check for min players, because it is possible for the 
@@ -199,6 +225,25 @@ public class MinigameRotator {
         }
         // if in game, return an empty list
         return retVal;
+    }
+
+    private static void updateOverallScores(Leaderboard leaderboard) {
+        final List<Leaderboard.PlayerScore> scores = leaderboard.getLeaderboard();
+
+        scores.forEach(ps -> Database.addOverallGames(ps.getPlayer(), 1));
+
+        if(scores.size() > 0) {
+            Database.addOverallWins(scores.get(0).getPlayer(), 1);
+            Database.addOverallPoints(scores.get(0).getPlayer(), 3);
+        }
+
+        if(scores.size() > 1) {
+            Database.addOverallPoints(scores.get(1).getPlayer(), 2);
+        }
+
+        if(scores.size() > 2) {
+            Database.addOverallPoints(scores.get(2).getPlayer(), 1);
+        }
     }
 }
 

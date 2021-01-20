@@ -52,6 +52,10 @@
   			<id>IntellectualSites</id>
   			<url>https://mvn.intellectualsites.com/content/repositories/releases/</url>
 		</repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -88,16 +92,22 @@
 	    	<artifactId>board</artifactId>
 	    	<version>left4craft-1.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-dbcp2</artifactId>
-			<version>2.7.0</version>
-		</dependency>
+    	<dependency>
+        	<groupId>com.zaxxer</groupId>
+        	<artifactId>HikariCP</artifactId>
+        	<version>3.4.5</version>
+    	</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
     		<groupId>org.json</groupId>
    			<artifactId>json</artifactId>
     		<version>20200518</version>
 		</dependency>
+		<dependency>
+         <groupId>me.clip</groupId>
+          <artifactId>placeholderapi</artifactId>
+          <version>2.10.9</version>
+         <scope>provided</scope>
+        </dependency>
 	</dependencies>
 </project>

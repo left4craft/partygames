@@ -1,0 +1,56 @@
+name = Quake
+description = Kill other players with your railgun!
+map = City
+
+type = quake
+
+kills_to_win n = 10
+
+spawns[0]
+  x n = 498.5
+  y n = 50.5
+  z n = -495.5
+  yaw n = 45
+  pitch n = 0
+spawns[1]
+  x n = 477.5
+  y n = 51.5
+  z n = -490.5
+  yaw n = 0
+  pitch n = 0
+spawns[2]
+  x n = 450.5
+  y n = 50.5
+  z n = -477.5
+  yaw n = 0
+  pitch n = 0
+spawns[3]
+  x n = 439.5
+  y n = 50.5
+  z n = -495.5
+  yaw n = -45
+  pitch n = 0
+spawns[4]
+  x n = 475.5
+  y n = 61.5
+  z n = -464.5
+  yaw n = 90
+  pitch n = 0
+spawns[5]
+  x n = 486.1
+  y n = 51.5
+  z n = -442.5
+  yaw n = 90
+  pitch n = 0
+spawns[6]
+  x n = 458.5
+  y n = 50.5
+  z n = -439.5
+  yaw n = 180
+  pitch n = 0
+spawns[7]
+  x n = 439.5
+  y n = 50.5
+  z n = -437.5
+  yaw n = 180
+  pitch n = 0

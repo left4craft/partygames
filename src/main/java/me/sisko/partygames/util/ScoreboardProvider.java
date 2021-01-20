@@ -13,12 +13,19 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class ScoreboardProvider implements BoardProvider {
     
-    private float hue = 0f;
-    private final float dashHueDiff = 0.01f;
+    private static float hue = 0f;
+    private static final float dashHueDiff = 0.01f;
 
     @Override
     public String getTitle(Player player) {
         return "&a&lParty Games";
+    }
+
+    public static void incrementRainbow() {
+        // increment the hue and wrap around to keep magnitude near 1
+        // so it doesn't slowly overflow / loose percision
+        hue += dashHueDiff;
+        hue -= Math.floor(hue);
     }
 
     @Override
@@ -47,10 +54,6 @@ public class ScoreboardProvider implements BoardProvider {
             dash.setText("-");
             rainbow.addExtra(dash);
         }
-        // increment the hue and wrap around to keep magnitude near 1
-        // so it doesn't slowly overflow / loose percision
-        hue += dashHueDiff;
-        hue -= Math.floor(hue);
 
         return rainbow.toLegacyText();
     }

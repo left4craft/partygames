@@ -25,6 +25,7 @@ import me.sisko.partygames.minigames.LastPlayerStandingMinigame;
 import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.OneInTheChamberMinigame;
 import me.sisko.partygames.minigames.ParkourMinigame;
+import me.sisko.partygames.minigames.QuakeMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.SumoMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
@@ -87,6 +88,8 @@ public class MinigameManager {
                 m = new LastPlayerStandingMinigame();
             } else if (type.equals("oneinthechamber")) {
                 m = new OneInTheChamberMinigame();
+            } else if (type.equals("quake")) {
+                m = new QuakeMinigame();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly
@@ -346,7 +349,11 @@ public class MinigameManager {
             p.setGameMode(GameMode.SURVIVAL);
             p.setInvisible(false);
             p.setGlowing(false);
+            p.setCollidable(true);
             p.getInventory().clear();
+            p.getActivePotionEffects().forEach(effect -> p.removePotionEffect(effect.getType()));
+            p.setExp(0f);
+            p.setLevel(0);
         }
     }
 }
