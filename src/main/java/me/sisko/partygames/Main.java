@@ -12,6 +12,7 @@ import me.sisko.partygames.commands.playCommand;
 import me.sisko.partygames.util.ConfigManager;
 import me.sisko.partygames.util.Database;
 import me.sisko.partygames.util.MinigameManager;
+import me.sisko.partygames.util.ScorePlaceholder;
 import me.sisko.partygames.util.ScoreboardProvider;
 
 public class Main extends JavaPlugin {
@@ -22,6 +23,11 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         getCommand("play").setExecutor(new playCommand());
+
+        // Small check to make sure that PlaceholderAPI is installed
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+            new ScorePlaceholder().register();
+        }
 
         manager = new BoardManager(this, new BoardSettings(new ScoreboardProvider(), ScoreDirection.UP));
         // auto increment rainbow
