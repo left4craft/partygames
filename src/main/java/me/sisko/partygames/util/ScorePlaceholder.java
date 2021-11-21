@@ -1,13 +1,8 @@
 package me.sisko.partygames.util;
 
-import javax.xml.crypto.Data;
-
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.sisko.partygames.Main;
-import me.sisko.partygames.minigames.Minigame;
 
 /**
  * This class will be registered through the register-method in the 

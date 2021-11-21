@@ -19,6 +19,10 @@ public class Leaderboard {
             score = 0;
         }
 
+        public void setScore(final int score) {
+            this.score = score;
+        }
+
         public void changScore(final int delta) {
             score += delta;
         }
@@ -77,6 +81,25 @@ public class Leaderboard {
         for(final PlayerScore score : scores) {
             if(score.getPlayer().getUniqueId().equals(player.getUniqueId())) {
                 score.changScore(delta);
+
+                // after incrementing, sort the scores
+                // order in opposite direction depending on whether scoreboard is reversed
+                scores.sort(new Comparator<PlayerScore>(){
+                    @Override
+                    public int compare(PlayerScore p1, PlayerScore p2) {
+                        if(!reversed) return p2.getScore() - p1.getScore();
+                        return p1.getScore() - p2.getScore();
+                    } 
+                });
+                return;
+            }
+        }
+    }
+
+    public void setScore(final Player player, final int setScore) {
+        for(final PlayerScore score : scores) {
+            if(score.getPlayer().getUniqueId().equals(player.getUniqueId())) {
+                score.setScore(setScore);
 
                 // after incrementing, sort the scores
                 // order in opposite direction depending on whether scoreboard is reversed
