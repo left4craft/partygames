@@ -63,7 +63,7 @@ public class DropperMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            p.teleportAsync(spawn);
+            p.teleport(spawn);
             p.setGameMode(GameMode.SURVIVAL);
         }
         MinigameManager.prestartComplete();

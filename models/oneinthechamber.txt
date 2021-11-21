@@ -1,5 +1,5 @@
 name = One in the Chamber
-description = You only get one chance to hit your arrow, after which you must fight with your sword
+description = You only get one chance to hit your instakilling arrow before you must resort to your sword.
 map = Snow
 
 type = oneinthechamber

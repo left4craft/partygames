@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -85,7 +85,7 @@ public class SpleefMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            p.teleportAsync(spawn);
+            p.teleport(spawn);
 
             p.getInventory().addItem(new ItemStack(Material.DIAMOND_SHOVEL));
         }
@@ -113,7 +113,7 @@ public class SpleefMinigame extends Minigame {
         // build the tnt arena
         CuboidRegion selection = new CuboidRegion(floor[0], floor[1]);
         try {
-            EditSession edit = new EditSessionBuilder(BukkitAdapter.adapt(Main.getWorld())).build();
+            EditSession edit = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(Main.getWorld()));
             edit.setBlocks((Region) selection, BlockTypes.SNOW_BLOCK);
             edit.close();
         } catch (MaxChangedBlocksException e) {

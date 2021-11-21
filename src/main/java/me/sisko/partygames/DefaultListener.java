@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -50,6 +51,9 @@ public class DefaultListener implements Listener {
         // }
         // Team team = sc.getTeam("noCollide");
         // team.addEntry(e.getPlayer().getName());
+        
+        // ensure player is cached in db
+        Database.getOverallGames(e.getPlayer());
 
         MinigameRotator.onJoin(e.getPlayer());
 
@@ -95,13 +99,17 @@ public class DefaultListener implements Listener {
 	public void onPlayerInteractEvent(PlayerInteractEvent e) {
 		if (e.getAction() == Action.PHYSICAL && (e.getClickedBlock().getType().equals(Material.DIRT) || e.getClickedBlock().getType().equals(Material.FARMLAND))) {
 			e.setCancelled(true);
-		}
+        }
+        
+        if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
+        }
 	}
 
     // by default, disallow inventory modifications
     @EventHandler(priority = EventPriority.LOW)
     public void onInventoryClick(InventoryClickEvent e) {
-        e.setCancelled(true);
+        if(!e.getWhoClicked().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -112,6 +120,12 @@ public class DefaultListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onHunger(FoodLevelChangeEvent e) {
         e.setFoodLevel(20);
+    }
+
+    // prevent armor stand stuff
+    @EventHandler(priority =  EventPriority.LOW)
+    public void onInteractAtEntity(PlayerInteractAtEntityEvent e) {
+        if(!e.getPlayer().getGameMode().equals(GameMode.CREATIVE)) e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -154,7 +168,7 @@ public class DefaultListener implements Listener {
     public void onVoidVall(PlayerMoveEvent e) {
         if(e.getTo().getY() < 0) {
             FileConfiguration config = Main.getPlugin().getConfig();
-            e.getPlayer().teleportAsync(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
+            e.getPlayer().teleport(new Location(Main.getPlugin().getServer().getWorld("world"), config.getDouble("spawn.x"), 
                 config.getDouble("spawn.y"), config.getDouble("spawn.z"), (float) config.getDouble("spawn.yaw"),
                 (float) config.getDouble("spawn.pitch")));
     

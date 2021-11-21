@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import me.sisko.partygames.Main;
 import me.sisko.partygames.minigames.DiggingMinigame;
 import me.sisko.partygames.minigames.DropperMinigame;
+import me.sisko.partygames.minigames.HoeHoeHoeMinigame;
 import me.sisko.partygames.minigames.LastPlayerStandingMinigame;
 import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.OneInTheChamberMinigame;
@@ -72,24 +73,37 @@ public class MinigameManager {
 
             // construct the correct type of minigame, based on the type parameter
             Minigame m = null;
-            if(type.equals("digging")) {
-                m = new DiggingMinigame();
-            } else if (type.equals("tntrun")) {
-                m = new TNTRunMinigame();
-            } else if (type.equals("dropper")) {
-                m = new DropperMinigame();
-            } else if (type.equals("spleef")) {
-                m = new SpleefMinigame();
-            } else if(type.equals("parkour")) {
-                m = new ParkourMinigame();
-            } else if(type.equals("sumo")) {
-                m = new SumoMinigame();
-            } else if(type.equals("lastplayerstanding")) {
-                m = new LastPlayerStandingMinigame();
-            } else if (type.equals("oneinthechamber")) {
-                m = new OneInTheChamberMinigame();
-            } else if (type.equals("quake")) {
-                m = new QuakeMinigame();
+            try {
+                if(type.equals("digging")) {
+                    m = new DiggingMinigame();
+                }
+                else if (type.equals("tntrun")) {
+                    m = new TNTRunMinigame();
+                }
+                else if (type.equals("dropper")) {
+                    m = new DropperMinigame();
+                }
+                else if (type.equals("spleef")) {
+                    m = new SpleefMinigame();
+                }
+                else if(type.equals("parkour")) {
+                    m = new ParkourMinigame();
+                } else if(type.equals("sumo")) {
+                    m = new SumoMinigame();
+                } else if(type.equals("lastplayerstanding")) {
+                    m = new LastPlayerStandingMinigame();
+                } else if (type.equals("oneinthechamber")) {
+                    m = new OneInTheChamberMinigame();
+                }
+                else if (type.equals("quake")) {
+                    m = new QuakeMinigame();
+                } 
+                else if (type.equals("hoehoehoe")) {
+                    m = new HoeHoeHoeMinigame();
+                }    
+            } catch (Exception e) {
+                Main.getPlugin().getLogger().warning("Error enabling minigame " + type);
+                e.printStackTrace();
             }
 
             // if type is valid, attempt to construct minigame and place it in the map accordingly
@@ -106,6 +120,8 @@ public class MinigameManager {
                 } else {
                     Main.getPlugin().getLogger().warning("Invalid JSON for this minigame type! Minigame not being loaded.");
                 }
+            } else {
+                Main.getPlugin().getLogger().warning("Undefined minigame type " + type);
             }
         }
     }
@@ -244,7 +260,6 @@ public class MinigameManager {
                 currentMinigame = null;
                 gameState = GameState.NOGAME;
 
-                correctPlayerStates();
                 MinigameRotator.gameComplete();
 
 

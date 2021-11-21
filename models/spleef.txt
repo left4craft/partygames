@@ -1,5 +1,5 @@
 name = Spleef
-description = Dig below the blocks from below your opponent, but be careful not to fall!
+description = Dig the blocks below your opponents, but be careful not to fall!
 map = Dark Colosseum
 
 type = spleef
