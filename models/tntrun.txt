@@ -1,5 +1,5 @@
 name = TNT Run
-description = Be careful not to fall as the blocks below your feet are destroyed.
+description = Be careful not to fall as the blocks decay beneath your feet!
 map = Colosseum
 
 type = tntrun

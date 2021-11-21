@@ -1,7 +1,7 @@
 package me.sisko.partygames.util;
 
 import org.bukkit.OfflinePlayer;
-
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -10,8 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.naming.spi.DirStateFactory.Result;
 
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -44,40 +42,52 @@ public class Database {
         ds.setJdbcUrl(host);
         ds.setUsername(user);
         ds.setPassword(pass);
+        ds.setMaximumPoolSize(15);
+        ds.setLeakDetectionThreshold(2000);
         ds.validate();
 
         cache = new HashMap<OfflinePlayer, JSONObject>();
     }
 
     public static void saveToDb(OfflinePlayer op) {
-        if(cache.containsKey(op)) {
-            final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
-            try {
-                Connection con = ds.getConnection();
-                PreparedStatement ps = con.prepareStatement(query);
-                ps.setString(1, op.getUniqueId().toString());
-                ResultSet rs = ps.executeQuery();
-
-                String update = null;
-                // if player already exists
-                if(rs.next()) {
-                    update = "UPDATE partygames_stats SET data = ? WHERE uuid = ?;";
-                } else {
-                    update = "INSERT INTO partygames_stats(data, uuid) VALUES (?, ?);";
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                if(cache.containsKey(op)) {
+                    final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
+                    try {
+                        Connection con = ds.getConnection();
+                        PreparedStatement ps = con.prepareStatement(query);
+                        ps.setString(1, op.getUniqueId().toString());
+                        ResultSet rs = ps.executeQuery();
+        
+                        String update = null;
+                        // if player already exists
+                        if(rs.next()) {
+                            update = "UPDATE partygames_stats SET data = ? WHERE uuid = ?;";
+                        } else {
+                            update = "INSERT INTO partygames_stats(data, uuid) VALUES (?, ?);";
+                        }
+                        ps = con.prepareStatement(update);
+                        ps.setString(1, cache.get(op).toString());
+                        ps.setString(2, op.getUniqueId().toString());
+                        ps.executeUpdate();
+                        con.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
-
-                ps = con.prepareStatement(update);
-                ps.setString(1, cache.get(op).toString());
-                ps.setString(2, op.getUniqueId().toString());
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        
             }
-        }
+        }.runTaskAsynchronously(Main.getPlugin());
     }
 
     public static int getOverallWins(OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has("overall_wins")) {
             return playerData.getInt("overall_wins");
         }
@@ -86,6 +96,10 @@ public class Database {
 
     public static void addOverallWins(OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
+
         if(playerData.has("overall_wins")) {
             playerData.put("overall_wins", playerData.getInt("overall_wins") + amount);
         } else {
@@ -95,6 +109,10 @@ public class Database {
 
     public static int getOverallPoints(OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has("overall_points")) {
             return playerData.getInt("overall_points");
         }
@@ -103,6 +121,10 @@ public class Database {
 
     public static void addOverallPoints(OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
+
         if(playerData.has("overall_points")) {
             playerData.put("overall_points", playerData.getInt("overall_points") + amount);
         } else {
@@ -112,6 +134,10 @@ public class Database {
 
     public static int getOverallGames(OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has("overall_games")) {
             return playerData.getInt("overall_games");
         }
@@ -120,6 +146,10 @@ public class Database {
 
     public static void addOverallGames(OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
+
         if(playerData.has("overall_games")) {
             playerData.put("overall_games", playerData.getInt("overall_games") + amount);
         } else {
@@ -128,15 +158,25 @@ public class Database {
     }
 
     public static double getOverallWinRate(OfflinePlayer op) {
+        // do nothing if player data is null
+        if(getOverallGames(op) == -1) return -1;
+
         return ((double) getOverallWins(op)) / getOverallGames(op);
     }
 
     public static double getOverallAveragePoints(OfflinePlayer op) {
+        // do nothing if player data is null
+        if(getOverallGames(op) == -1) return -1;
+        
         return ((double) getOverallPoints(op)) / getOverallGames(op);
     }
 
     public static int getWins(String game, OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has(game) && playerData.getJSONObject(game).has("wins")) {
             return playerData.getJSONObject(game).getInt("wins");
         }
@@ -145,6 +185,9 @@ public class Database {
 
     public static void addWins(String game, OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
 
         // case 1: game jsonobject and its key are both defined
         if(playerData.has(game) && playerData.getJSONObject(game).has("wins")) {
@@ -166,6 +209,10 @@ public class Database {
 
     public static int getPoints(String game, OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has(game) && playerData.getJSONObject(game).has("points")) {
             return playerData.getJSONObject(game).getInt("points");
         }
@@ -174,6 +221,9 @@ public class Database {
 
     public static void addPoints(String game, OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
 
         // case 1: game jsonobject and its key are both defined
         if(playerData.has(game) && playerData.getJSONObject(game).has("points")) {
@@ -195,6 +245,10 @@ public class Database {
 
     public static int getGames(String game, OfflinePlayer op) {
         JSONObject playerData = getPlayer(op);
+
+        // return -1 if null
+        if(playerData == null) return -1;
+
         if(playerData.has(game) && playerData.getJSONObject(game).has("games")) {
             return playerData.getJSONObject(game).getInt("games");
         }
@@ -203,6 +257,9 @@ public class Database {
 
     public static void addGames(String game, OfflinePlayer op, int amount) {
         JSONObject playerData = getPlayer(op);
+
+        // do nothing if player data is null
+        if(playerData == null) return;
 
         // case 1: game jsonobject and its key are both defined
         if(playerData.has(game) && playerData.getJSONObject(game).has("games")) {
@@ -224,38 +281,52 @@ public class Database {
 
 
     public static double getWinRate(String game, OfflinePlayer op) {
+        // do nothing if player data is null
+        if(getOverallGames(op) == -1) return -1;
+        
         return ((double) getWins(game, op)) / getGames(game, op);
     }
 
     public static double getAveragePoints(String game, OfflinePlayer op) {
+        // do nothing if player data is null
+        if(getOverallGames(op) == -1) return -1;
+        
         return ((double) getPoints(game, op)) / getGames(game, op);
     }
 
     private static JSONObject getPlayer(OfflinePlayer op) {
+        if(cache == null) {
+            cache = new HashMap<OfflinePlayer, JSONObject>();
+        }
         if (cache.containsKey(op)) {
             return cache.get(op);
         } else {
-            final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
-            try {
-                Connection con = ds.getConnection();
-                PreparedStatement ps = con.prepareStatement(query);
-                ps.setString(1, op.getUniqueId().toString());
-                ResultSet rs = ps.executeQuery();
-                if(rs.next()) {
-                    cache.put(op, new JSONObject(rs.getString("data")));
-                } else {
-                    cache.put(op, new JSONObject());
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
+                    try {
+                        Connection con = ds.getConnection();
+
+                        PreparedStatement ps = con.prepareStatement(query);
+                        ps.setString(1, op.getUniqueId().toString());
+                        ResultSet rs = ps.executeQuery();
+                        if(rs.next()) {
+                            cache.put(op, new JSONObject(rs.getString("data")));
+                        } else {
+                            cache.put(op, new JSONObject());
+                        }
+                        con.close();
+        
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+        
                 }
-                return cache.get(op);
+            }.runTaskAsynchronously(Main.getPlugin());
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            // in the case of error, return a blank jsonobject
-            // do not add to cache, otherwise blank data might
-            // overwrite saved data
-            return new JSONObject();
+            // if player is not cached, return null and asynchronously fill the cache for next time
+            return null;
         }
     }
 }

@@ -1,0 +1,20 @@
+name = Hoe Hoe Hoe
+description = Till as many blocks as you can. You can only till blocks adjacent to those you've already tilled.
+map = Greenhouse
+
+type = hoehoehoe
+
+num_blocks n = 1010
+radius n = 20
+
+spawn
+  x n = 0.5
+  y n = 51.5
+  z n = -499.5
+  yaw n = 0
+  pitch n = 0
+
+center
+  x n = 0
+  y n = 50
+  z n = -500

@@ -71,10 +71,10 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-  		<groupId>com.intellectualsites.fawe</groupId>
-  			<artifactId>FAWE-Bukkit</artifactId>
-  			<version>1.16-462</version>
-			  <scope>provided</scope>
+  			<groupId>com.fastasyncworldedit</groupId>
+  			<artifactId>FastAsyncWorldEdit-Bukkit</artifactId>
+  			<version>1.17-396</version>
+  			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>

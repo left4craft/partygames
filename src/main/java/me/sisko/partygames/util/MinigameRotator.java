@@ -6,11 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import javax.xml.crypto.Data;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,7 +19,7 @@ import me.sisko.partygames.util.MinigameManager.GameState;
 
 public class MinigameRotator {
     public static final int MIN_PLAYERS = 4;
-    public static final int GAMES_PER_ROTATION = 8;
+    public static final int GAMES_PER_ROTATION = 6;
 
     private static boolean rotating = false;
     private static long startTime = 0;
@@ -164,8 +161,6 @@ public class MinigameRotator {
 
             ChatSender.broadcastOVerallWinners(leaderboard);
 
-            // @TODO move this to inside the if statement after testing is complete
-            updateOverallScores(leaderboard);
 
             // start the rotation for the next game
             // must check for min players, because it is possible for the 
@@ -175,6 +170,8 @@ public class MinigameRotator {
             // because leaderboards are only updated when a rotation finishes with all players
             if (Bukkit.getOnlinePlayers().size() >= MIN_PLAYERS) {
                 //if(startGameRunnable != null) startGameRunnable.cancel();
+                updateOverallScores(leaderboard);
+
                 startTime = System.currentTimeMillis() + 30 * 1000;
                 startGameRunnable = new BukkitRunnable(){
                     @Override
@@ -207,6 +204,16 @@ public class MinigameRotator {
             } else {
                 retVal.add("&bGames start: &f" + (int) Math.floor(diff/60000.) + ":" + seconds_str);
             }
+
+            retVal.add("");
+            retVal.add("&bTotal Points: &f" + Database.getOverallPoints(p));
+            retVal.add("");
+            retVal.add("&bTotal Wins: &f" + Database.getOverallWins(p));
+            retVal.add("");
+            retVal.add("&bAverage Points per Game: &f" + Math.round(Database.getOverallAveragePoints(p)*100.)/100.);
+            retVal.add("");
+            retVal.add("&bOverall Win Rate: &f" + Math.round(Database.getOverallWinRate(p)*10000.)/100. + "%");
+
         } else if(!MinigameManager.getGameState().equals(GameState.INGAME)) {
             retVal.add("&bGame: &f" + (currentMinigame+1) + "/" + GAMES_PER_ROTATION);
 

@@ -1,5 +1,5 @@
 name = Sumo
-description = Try to knock others off the platform, but be careful not to fall off yourself!
+description = Try to knock others off the platform, but be careful not to fall off!
 map = Lava
 
 type = sumo

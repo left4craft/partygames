@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -15,6 +15,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockTypes;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -91,7 +92,7 @@ public class TNTRunMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            p.teleportAsync(spawn);
+            p.teleport(spawn);
         }
         MinigameManager.prestartComplete();
     }
@@ -154,7 +155,7 @@ public class TNTRunMinigame extends Minigame {
         for (BlockVector3[] layer : layers) {
             CuboidRegion selection = new CuboidRegion(layer[0], layer[1]);
             try {
-                EditSession edit = new EditSessionBuilder(BukkitAdapter.adapt(Main.getWorld())).build();
+                EditSession edit = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(Main.getWorld()));
                 edit.setBlocks((Region) selection, BlockTypes.RED_SANDSTONE);
                 edit.close();
             } catch (MaxChangedBlocksException e) {
@@ -213,7 +214,7 @@ public class TNTRunMinigame extends Minigame {
                 addPlayer(e.getPlayer());
             
             // player is in game after winning and has just died
-            } else {
+            } else if (MinigameManager.getGameState().equals(GameState.POSTGAME)) {
                 addPlayer(e.getPlayer());
             }
         } else if (MinigameManager.isInGame(e.getPlayer()) && MinigameManager.getGameState().equals(GameState.INGAME)) {

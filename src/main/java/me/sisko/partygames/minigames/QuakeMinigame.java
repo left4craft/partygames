@@ -91,7 +91,7 @@ public class QuakeMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             lastShot.put(p, 0l);
-            p.teleportAsync(getRandomSpawn());
+            p.teleport(getRandomSpawn());
         }
         MinigameManager.prestartComplete();
     }

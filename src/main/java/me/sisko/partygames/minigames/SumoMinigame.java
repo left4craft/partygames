@@ -80,7 +80,7 @@ public class SumoMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             
-            p.teleportAsync(spawn);
+            p.teleport(spawn);
         }
         MinigameManager.prestartComplete();
     }

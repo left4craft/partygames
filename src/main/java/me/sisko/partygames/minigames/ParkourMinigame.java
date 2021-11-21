@@ -12,6 +12,8 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
@@ -81,7 +83,7 @@ public class ParkourMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
             checkpoints.put(p, spawn);
-            p.teleportAsync(spawn);
+            p.teleport(spawn);
             p.setGameMode(GameMode.SURVIVAL);
 
             p.setInvisible(true);

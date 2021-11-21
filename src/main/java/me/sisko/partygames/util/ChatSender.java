@@ -57,7 +57,7 @@ public class ChatSender {
     }
 
     public static void broadcastOVerallWinners(final Leaderboard leaderboard) {
-        broadcast("Minigame rotation complete complete");
+        broadcast("Minigame rotation complete");
         Bukkit.broadcastMessage("");
         Bukkit.broadcastMessage("" + ChatColor.GREEN + ChatColor.UNDERLINE + ChatColor.BOLD + "Overall Winners");
         for(int i = 0; i < leaderboard.getLeaderboard().size(); i++) {

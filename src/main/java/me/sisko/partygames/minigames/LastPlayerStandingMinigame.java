@@ -18,10 +18,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.projectiles.ProjectileSource;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
@@ -91,7 +89,7 @@ public class LastPlayerStandingMinigame extends Minigame {
             final Player p = players.get(i);
             
             lastHit.put(p, null);
-            p.teleportAsync(getRandomSpawn());
+            p.teleport(getRandomSpawn());
             p.setGlowing(true);
         }
         MinigameManager.prestartComplete();
@@ -102,7 +100,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         for(Player p : MinigameManager.getIngamePlayers()) {
             p.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
             p.getInventory().addItem(new ItemStack(Material.BOW));
-            p.getInventory().addItem(new ItemStack(Material.ARROW, 32));
+            p.getInventory().addItem(new ItemStack(Material.ARROW, 12));
 
             p.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
             p.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
@@ -271,6 +269,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         // else respawn
         } else {
             damagee.teleport(getRandomSpawn());
+            resetArrows(damagee);
             damagee.setHealth(20);
             damagee.setFireTicks(0);
             ChatSender.tell(damagee, "You were killed and lost a life");
@@ -297,5 +296,14 @@ public class LastPlayerStandingMinigame extends Minigame {
             //Collections.reverse(winners);
             MinigameManager.gameComplete(livesRemaining.getWinners());
         }
+    }
+
+    private void resetArrows(Player p) {
+        for(ItemStack item : p.getInventory().getContents()) {
+            if(item != null && item.getType().equals(Material.ARROW)) {
+                p.getInventory().remove(item);
+            }
+        }
+        p.getInventory().addItem(new ItemStack(Material.ARROW, 12));
     }
 }

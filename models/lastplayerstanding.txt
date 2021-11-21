@@ -1,5 +1,5 @@
 name = Last Player Standing
-description = Free-for-all PvP, where the last player left alive wins the game!
+description = Free-for-all PvP where the last player left alive wins the game! Each kill grants a stack of strength and some healing.
 map = Rods
 
 type = lastplayerstanding

@@ -1,13 +1,8 @@
 package me.sisko.partygames.util;
 
-import javax.xml.crypto.Data;
-
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.sisko.partygames.Main;
-import me.sisko.partygames.minigames.Minigame;
 
 /**
  * This class will be registered through the register-method in the 
@@ -115,7 +110,7 @@ public class ScorePlaceholder extends PlaceholderExpansion  {
 
         // winrate
         if(identifier.equals("allwr")){
-            return "" + Math.round(Database.getOverallWinRate(player)*100.);
+            return "" + Database.getOverallWinRate(player)*100.;
         }
 
         String[] parts = identifier.split("_");
@@ -128,23 +123,28 @@ public class ScorePlaceholder extends PlaceholderExpansion  {
         if(parts.length < 2 || !MinigameManager.isValidType(parts[0])) return null;
 
         if(parts[1].equals("wins")) {
-            return "" + Database.getWins(parts[0], player);
+            int wins = Database.getWins(parts[0], player);
+            return wins == -1 ? null : "" + wins;
         }
 
         if (parts[1].equals("points")) {
-            return "" + Database.getPoints(parts[0], player);
+            int points = Database.getPoints(parts[0], player);
+            return points == -1 ? null : "" + points;
         }
 
         if (parts[1].equals("games")) {
-            return "" + Database.getGames(parts[0], player);
+            int games = Database.getGames(parts[0], player);
+            return games == -1 ? null : "" + games;
         } 
 
         if (parts[1].equals("ppg")) {
-            return "" + Database.getAveragePoints(parts[0], player);
+            double ppg = Database.getAveragePoints(parts[0], player);
+            return ppg < 0 ? null : "" + ppg;
         }
 
         if (parts[1].equals("wr")) {
-            return "" + Math.round(Database.getWinRate(parts[0], player)*100.);
+            double wr = Database.getWinRate(parts[0], player)*100.;
+            return wr < 0 ? null : "" + wr;
         } 
 
         // We return null if an invalid placeholder (f.e. %someplugin_placeholder3%) 

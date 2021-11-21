@@ -110,7 +110,7 @@ public class DiggingMinigame extends Minigame {
         for(int i = 0; i < players.size(); i++) {
             final Player p = players.get(i);
 
-            p.teleportAsync(spawns.get(i));
+            p.teleport(spawns.get(i));
             p.setGameMode(GameMode.SURVIVAL);
             p.getInventory().clear();
             for(final ItemStack item : tools) {
