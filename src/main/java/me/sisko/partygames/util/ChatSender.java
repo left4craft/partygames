@@ -16,7 +16,9 @@ public class ChatSender {
     
     public static enum ChatSound {
         COUNTDOWN,
-        START
+        START,
+        REDLIGHT,
+        GREENLIGHT
     };
 
     public static void broadcast(final String message) {
@@ -29,6 +31,10 @@ public class ChatSender {
             Bukkit.getOnlinePlayers().forEach(p->p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.BLOCKS, 1f, 0.5f));
         } else if (sound == ChatSound.START) {
             Bukkit.getOnlinePlayers().forEach(p->p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.BLOCKS, 1f, 1f));
+        } else if (sound == ChatSound.REDLIGHT) {
+            Bukkit.getOnlinePlayers().forEach(p->p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, SoundCategory.BLOCKS, 1f, 1f));
+        } else if (sound == ChatSound.GREENLIGHT) {
+            Bukkit.getOnlinePlayers().forEach(p->p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, SoundCategory.BLOCKS, 1f, 1f));
         }
     }
 

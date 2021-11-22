@@ -32,3 +32,6 @@ TNT run:
 
 Sumo
 -1000 40 0
+
+Red Light Green Light
+-1000 40 500
