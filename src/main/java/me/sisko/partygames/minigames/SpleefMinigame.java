@@ -4,15 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.block.BlockTypes;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,7 +22,7 @@ import me.sisko.partygames.util.MinigameManager.GameState;
 public class SpleefMinigame extends Minigame {
 
     private Location spawn;
-    private BlockVector3[] floor;
+    private Location[] floor;
     private int lowestY;
 
     private List<Player> winners;
@@ -67,8 +58,10 @@ public class SpleefMinigame extends Minigame {
 
         lowestY = layerJson.getInt("y");
 
-        final BlockVector3[] floor = { BlockVector3.at(layerJson.getInt("x_1"), lowestY, layerJson.getInt("z_1")),
-                    BlockVector3.at(layerJson.getInt("x_2"), lowestY, layerJson.getInt("z_2")) };
+        final Location[] floor = { new Location(Main.getWorld(), Math.min(layerJson.getInt("x_1"), layerJson.getInt("x_2")), lowestY, 
+                Math.min(layerJson.getInt("z_1"), layerJson.getInt("z_2"))),
+                new Location(Main.getWorld(), Math.max(layerJson.getInt("x_1"), layerJson.getInt("x_2")), lowestY, 
+                Math.max(layerJson.getInt("z_1"), layerJson.getInt("z_2"))) };
         this.floor = floor;
 
     }
@@ -110,15 +103,10 @@ public class SpleefMinigame extends Minigame {
         }
         winners.clear();
 
-        // build the tnt arena
-        CuboidRegion selection = new CuboidRegion(floor[0], floor[1]);
-        try {
-            EditSession edit = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(Main.getWorld()));
-            edit.setBlocks((Region) selection, BlockTypes.SNOW_BLOCK);
-            edit.close();
-        } catch (MaxChangedBlocksException e) {
-            Main.getPlugin().getLogger().warning("Could not set the spleef floor!");
-            e.printStackTrace();
+        for(double x = floor[0].getX(); x < floor[1].getX(); x++) {
+            for(double z = floor[0].getZ(); z < floor[1].getZ(); z++) {
+                Main.getWorld().getBlockAt(new Location(Main.getWorld(), x, lowestY, z)).setType(Material.SNOW_BLOCK);
+            }
         }
     }
 

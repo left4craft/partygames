@@ -5,16 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.Vector2;
-import com.sk89q.worldedit.regions.CylinderRegion;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.block.BlockTypes;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,8 +29,8 @@ public class HoeHoeHoeMinigame extends Minigame {
         Material.PINK_WOOL};
 
     private Location spawn;
-    private BlockVector3 center;
-    private Vector2 radius;
+    private Location center;
+    private double radius;
     private int placed;
     private int numBlocks;
 
@@ -74,8 +64,8 @@ public class HoeHoeHoeMinigame extends Minigame {
 
         JSONObject centerJson = json.getJSONObject("center");
 
-        center = BlockVector3.at(centerJson.getInt("x"), centerJson.getInt("y"), centerJson.getInt("z"));
-        radius = Vector2.at(json.getDouble("radius"), json.getDouble("radius"));
+        center = new Location(Main.getWorld(), centerJson.getInt("x"), centerJson.getInt("y"), centerJson.getInt("z"));
+        radius = json.getDouble("radius");
 
         numBlocks = json.getInt("num_blocks");
     }
@@ -123,14 +113,13 @@ public class HoeHoeHoeMinigame extends Minigame {
         }
 
         // build the arena
-        CylinderRegion selection = new CylinderRegion(center, radius, center.getBlockY(), center.getBlockY());
-        try {
-            EditSession edit = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(Main.getWorld()));
-            edit.setBlocks((Region) selection, BlockTypes.GRASS_BLOCK);
-            edit.close();
-        } catch (MaxChangedBlocksException e) {
-            Main.getPlugin().getLogger().warning("Could not set the hoehoehoe floor!");
-            e.printStackTrace();
+        for(double x = center.getX()-radius; x < center.getX()+radius; x++) {
+            for(double z = center.getZ()-radius; z < center.getZ()+radius; z++) {
+                Location iter = new Location(Main.getWorld(), x, center.getY(), z);
+                if(iter.distance(center) <= radius) {
+                    Main.getWorld().getBlockAt(iter).setType(Material.GRASS_BLOCK);
+                }
+            }
         }
     }
 

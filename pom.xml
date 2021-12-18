@@ -48,10 +48,6 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		<repository>
-  			<id>IntellectualSites</id>
-  			<url>https://mvn.intellectualsites.com/content/repositories/releases/</url>
-		</repository>
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
@@ -69,12 +65,6 @@
 			<artifactId>VaultAPI</artifactId>
 			<version>1.7</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-  			<groupId>com.fastasyncworldedit</groupId>
-  			<artifactId>FastAsyncWorldEdit-Bukkit</artifactId>
-  			<version>1.17-396</version>
-  			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
