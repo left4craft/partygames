@@ -30,6 +30,7 @@ import me.sisko.partygames.minigames.QuakeMinigame;
 import me.sisko.partygames.minigames.SpleefMinigame;
 import me.sisko.partygames.minigames.SumoMinigame;
 import me.sisko.partygames.minigames.TNTRunMinigame;
+import me.sisko.partygames.minigames.RedLightMinigame;
 import me.sisko.partygames.util.ChatSender.ChatSound;
 
 public class MinigameManager {
@@ -100,7 +101,9 @@ public class MinigameManager {
                 } 
                 else if (type.equals("hoehoehoe")) {
                     m = new HoeHoeHoeMinigame();
-                }    
+                } else if (type.equals("redlightgreenlight")) {
+                    m = new RedLightMinigame();
+                }
             } catch (Exception e) {
                 Main.getPlugin().getLogger().warning("Error enabling minigame " + type);
                 e.printStackTrace();
