@@ -22,6 +22,7 @@ import me.sisko.partygames.Main;
 import me.sisko.partygames.minigames.DiggingMinigame;
 import me.sisko.partygames.minigames.DropperMinigame;
 import me.sisko.partygames.minigames.HoeHoeHoeMinigame;
+import me.sisko.partygames.minigames.KOTHMinigame;
 import me.sisko.partygames.minigames.LastPlayerStandingMinigame;
 import me.sisko.partygames.minigames.Minigame;
 import me.sisko.partygames.minigames.OneInTheChamberMinigame;
@@ -103,6 +104,8 @@ public class MinigameManager {
                     m = new HoeHoeHoeMinigame();
                 } else if (type.equals("redlightgreenlight")) {
                     m = new RedLightMinigame();
+                } else if (type.equals("koth")) {
+                    m = new KOTHMinigame();
                 }
             } catch (Exception e) {
                 Main.getPlugin().getLogger().warning("Error enabling minigame " + type);

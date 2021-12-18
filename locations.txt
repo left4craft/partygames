@@ -9,7 +9,7 @@ Digging game:
 Parkour:
 500 170 500
 
-Dropper:
+Dropper Forest:
 500 211 0
 
 Quake:
@@ -35,3 +35,9 @@ Sumo
 
 Red Light Green Light
 -1000 40 500
+
+Dropper Kings Quarry
+-1000 163 1000
+
+KOTH Oasis
+1000 79 0

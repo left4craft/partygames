@@ -68,7 +68,7 @@ public class RedLightMinigame extends Minigame {
         description = json.getString("description");
         map = json.getString("map");
 
-        Main.getPlugin().getLogger().info("Setting up a sumo map " + map);
+        Main.getPlugin().getLogger().info("Setting up a red light green light map " + map);
 
         // add the spawn points
         final JSONObject spawnJson = json.getJSONObject("spawn");
