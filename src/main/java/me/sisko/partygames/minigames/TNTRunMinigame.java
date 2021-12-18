@@ -5,15 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.block.BlockTypes;
-
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -33,7 +24,7 @@ import me.sisko.partygames.util.MinigameManager.GameState;
 public class TNTRunMinigame extends Minigame {
 
     private Location spawn;
-    private List<BlockVector3[]> layers;
+    private List<Location[]> layers;
     private int lowestY;
 
     private List<Player> winners;
@@ -65,7 +56,7 @@ public class TNTRunMinigame extends Minigame {
                 spectatorJson.getDouble("z"), spectatorJson.getFloat("yaw"), spectatorJson.getFloat("pitch"));
 
         lowestY = 255;
-        layers = new ArrayList<BlockVector3[]>();
+        layers = new ArrayList<Location[]>();
         for (final Object layer : json.getJSONArray("layers")) {
             JSONObject layerJson = (JSONObject) layer;
 
@@ -73,10 +64,12 @@ public class TNTRunMinigame extends Minigame {
             if (y < lowestY)
                 lowestY = y;
 
-            BlockVector3[] layerLocation = { BlockVector3.at(layerJson.getInt("x_1"), y, layerJson.getInt("z_1")),
-                    BlockVector3.at(layerJson.getInt("x_2"), y, layerJson.getInt("z_2")) };
+            final Location[] floor = { new Location(Main.getWorld(), Math.min(layerJson.getInt("x_1"), layerJson.getInt("x_2")), y, 
+                Math.min(layerJson.getInt("z_1"), layerJson.getInt("z_2"))),
+                new Location(Main.getWorld(), Math.max(layerJson.getInt("x_1"), layerJson.getInt("x_2")), y, 
+                Math.max(layerJson.getInt("z_1"), layerJson.getInt("z_2"))) };
 
-            layers.add(layerLocation);
+            layers.add(floor);
         }
     }
 
@@ -103,12 +96,12 @@ public class TNTRunMinigame extends Minigame {
             @Override
             public void run() {
                 Random rng = new Random();
-                for (BlockVector3[] layer : layers) {
-                    final int minz = Math.min(layer[0].getBlockZ(), layer[1].getBlockZ());
-                    final int maxz = Math.max(layer[0].getBlockZ(), layer[1].getBlockZ());
+                for (Location[] layer : layers) {
+                    final int minz = layer[0].getBlockZ();
+                    final int maxz = layer[1].getBlockZ();
 
-                    final int minx = Math.min(layer[0].getBlockX(), layer[1].getBlockX());
-                    final int maxx = Math.max(layer[0].getBlockX(), layer[1].getBlockX());
+                    final int minx = layer[0].getBlockX();
+                    final int maxx = layer[1].getBlockX();
 
                     for(int x = minx; x <= maxx; x++) {
                         for(int z = minz; z < maxz; z++) {
@@ -152,19 +145,20 @@ public class TNTRunMinigame extends Minigame {
         winners.clear();
 
         // build the tnt arena
-        for (BlockVector3[] layer : layers) {
-            CuboidRegion selection = new CuboidRegion(layer[0], layer[1]);
-            try {
-                EditSession edit = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(Main.getWorld()));
-                edit.setBlocks((Region) selection, BlockTypes.RED_SANDSTONE);
-                edit.close();
-            } catch (MaxChangedBlocksException e) {
-                Main.getPlugin().getLogger().warning("Could not set the tnt run floor!");
-                e.printStackTrace();
+        for (Location[] layer : layers) {
+            final int minz = layer[0].getBlockZ();
+            final int maxz = layer[1].getBlockZ();
+
+            final int minx = layer[0].getBlockX();
+            final int maxx = layer[1].getBlockX();
+
+            for(int x = minx; x <= maxx; x++) {
+                for(int z = minz; z < maxz; z++) {
+                    new Location(Main.getWorld(), x, layer[0].getBlockY(), z).getBlock().setType(Material.RED_SANDSTONE);
+                }
             }
-        
         }
-    }
+}
 
     @Override
     public final List<Player> timeout() {
