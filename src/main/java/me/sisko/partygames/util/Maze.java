@@ -197,6 +197,9 @@ public class Maze {
         return outMap;
     }
 
+    public final ArrayList<cellwall> getMaze() {
+        return maze_;
+    }
     public final int getHeight() {
         return height;
     }
