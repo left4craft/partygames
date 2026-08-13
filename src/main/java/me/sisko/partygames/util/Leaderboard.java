@@ -10,7 +10,7 @@ public class Leaderboard {
     private List<PlayerScore> scores;
     private boolean reversed;
 
-    public class PlayerScore {
+    public static class PlayerScore {
         private Player player;
         private int score;
 

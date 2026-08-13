@@ -22,6 +22,8 @@ import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
 import me.sisko.partygames.util.MinigameManager.GameState;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class OneInTheChamberMinigame extends Minigame {
 
@@ -185,7 +187,7 @@ public class OneInTheChamberMinigame extends Minigame {
         }
         retVal.add("&b&nKill Leaderboard");
         for(PlayerScore score : kills.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;
@@ -209,8 +211,8 @@ public class OneInTheChamberMinigame extends Minigame {
         damagee.setHealth(20);
         damagee.setFireTicks(0);
         resetArrows(damagee);
-        ChatSender.tell(damager, "You killed " + damagee.getDisplayName());
-        ChatSender.tell(damagee, "You were killed by " + damager.getDisplayName());
+        ChatSender.tell(damager, Component.text("You killed ", NamedTextColor.GRAY).append(damagee.displayName()));
+        ChatSender.tell(damagee, Component.text("You were killed by ", NamedTextColor.GRAY).append(damager.displayName()));
 
         if(kills.getScore(damager) >= killsToWin) {
             MinigameManager.gameComplete(kills.getWinners());

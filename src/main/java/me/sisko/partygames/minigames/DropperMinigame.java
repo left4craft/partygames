@@ -146,7 +146,7 @@ public class DropperMinigame extends Minigame {
         retVal.add("&b&nFinishers");
 
         for(final Player winner : winners) {
-            retVal.add("&a" + winner.getDisplayName());
+            retVal.add("&a" + ChatSender.legacyName(winner));
         }
 
         return retVal;

@@ -171,7 +171,7 @@ public class SpleefMinigame extends Minigame {
         }
         retVal.add("&bPlayers left: &f" + MinigameManager.getNumberInGame());
         for(Player ingamePlayer : MinigameManager.getIngamePlayers()) {
-            retVal.add("&a" + ingamePlayer.getDisplayName());
+            retVal.add("&a" + ChatSender.legacyName(ingamePlayer));
         }
 
         return retVal;

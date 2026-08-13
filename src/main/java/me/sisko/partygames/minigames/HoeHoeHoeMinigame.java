@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
@@ -159,7 +160,7 @@ public class HoeHoeHoeMinigame extends Minigame {
         retVal.add("&b&nLeaderboard");
 
         for(final PlayerScore score : leaderboard.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;

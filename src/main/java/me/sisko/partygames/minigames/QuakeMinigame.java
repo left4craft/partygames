@@ -33,7 +33,9 @@ import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.XpBarFill;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
 import me.sisko.partygames.util.MinigameManager.GameState;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 
 public class QuakeMinigame extends Minigame {
 
@@ -100,14 +102,14 @@ public class QuakeMinigame extends Minigame {
     public void start() {
         ItemStack gun = new ItemStack(Material.DIAMOND_HOE);
         gun.setAmount(1);
-        gun.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+        gun.addUnsafeEnchantment(Enchantment.UNBREAKING, 10);
         gun.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
 
         ItemMeta meta = gun.getItemMeta();
-        meta.setDisplayName("" + ChatColor.RED + ChatColor.BOLD + "Rail Gun");
-        List<String> lore = new ArrayList<String>();
-        lore.add(ChatColor.GRAY + "Right click to shoot");
-        meta.setLore(lore);
+        meta.displayName(Component.text("Rail Gun", NamedTextColor.RED, TextDecoration.BOLD)
+            .decoration(TextDecoration.ITALIC, false));
+        meta.lore(List.of(Component.text("Right click to shoot", NamedTextColor.GRAY)
+            .decoration(TextDecoration.ITALIC, false)));
         gun.setItemMeta(meta);
 
         for(Player p : MinigameManager.getIngamePlayers()) {
@@ -115,7 +117,7 @@ public class QuakeMinigame extends Minigame {
             p.setExp(1f);
 
             p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false, true));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 2, false, false, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 2, false, false, true));
         }
     }
 
@@ -133,7 +135,7 @@ public class QuakeMinigame extends Minigame {
             p.getInventory().clear();
             p.setHealth(20);
             p.removePotionEffect(PotionEffectType.SPEED);
-            p.removePotionEffect(PotionEffectType.JUMP);
+            p.removePotionEffect(PotionEffectType.JUMP_BOOST);
             p.setExp(0f);
         }
     }
@@ -156,7 +158,7 @@ public class QuakeMinigame extends Minigame {
         p.setHealth(20);
         p.setFireTicks(0);
         p.removePotionEffect(PotionEffectType.SPEED);
-        p.removePotionEffect(PotionEffectType.JUMP);
+        p.removePotionEffect(PotionEffectType.JUMP_BOOST);
     }
 
     @Override
@@ -202,7 +204,7 @@ public class QuakeMinigame extends Minigame {
             }
 
             // spawn particle
-            bullet.getWorld().spawnParticle(Particle.DRIP_LAVA, bullet, 1, 0, 0, 0, 0, null, true);
+            bullet.getWorld().spawnParticle(Particle.DRIPPING_LAVA, bullet, 1, 0, 0, 0, 0, null, true);
         }
     }
     // @EventHandler
@@ -247,7 +249,7 @@ public class QuakeMinigame extends Minigame {
         }
         retVal.add("&b&nKill Leaderboard");
         for(PlayerScore score : kills.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;
@@ -267,8 +269,8 @@ public class QuakeMinigame extends Minigame {
 
         // respawn
         damagee.teleport(getRandomSpawn());
-        ChatSender.tell(damager, "You fragged " + damagee.getDisplayName());
-        ChatSender.tell(damagee, "You were fragged by " + damager.getDisplayName());
+        ChatSender.tell(damager, Component.text("You fragged ", NamedTextColor.GRAY).append(damagee.displayName()));
+        ChatSender.tell(damagee, Component.text("You were fragged by ", NamedTextColor.GRAY).append(damager.displayName()));
 
         if(kills.getScore(damager) >= killsToWin) {
             MinigameManager.gameComplete(kills.getWinners());

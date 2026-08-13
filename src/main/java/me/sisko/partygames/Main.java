@@ -5,41 +5,43 @@ import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import me.missionary.board.BoardManager;
-import me.missionary.board.settings.BoardSettings;
-import me.missionary.board.settings.ScoreDirection;
-import me.sisko.partygames.commands.playCommand;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import me.sisko.partygames.commands.PlayCommand;
 import me.sisko.partygames.util.ConfigManager;
 import me.sisko.partygames.util.Database;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.ScorePlaceholder;
 import me.sisko.partygames.util.ScoreboardProvider;
+import me.sisko.partygames.util.SidebarManager;
 
 public class Main extends JavaPlugin {
     private static Main plugin;
-    private BoardManager manager;
+    private SidebarManager sidebar;
 
     @Override
     public void onEnable() {
         plugin = this;
-        getCommand("play").setExecutor(new playCommand());
+
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
+            event.registrar().register("play", "Force-start a specific minigame", new PlayCommand()));
 
         // Small check to make sure that PlaceholderAPI is installed
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
             new ScorePlaceholder().register();
         }
 
-        manager = new BoardManager(this, new BoardSettings(new ScoreboardProvider(), ScoreDirection.UP));
-        // auto increment rainbow
+        sidebar = new SidebarManager(new ScoreboardProvider());
+        // auto increment rainbow and redraw the sidebars
         new BukkitRunnable(){
             @Override
             public void run() {
                 ScoreboardProvider.incrementRainbow();
+                sidebar.update();
             }
-            
+
         }.runTaskTimer(this, 0, 1);
 
-        Bukkit.getPluginManager().registerEvents(manager, this);
+        Bukkit.getPluginManager().registerEvents(sidebar, this);
         Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
         ConfigManager.load();
         MinigameManager.load();
@@ -49,7 +51,7 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        manager.onDisable();
+        sidebar.onDisable();
     }
 
     public static Main getPlugin() {

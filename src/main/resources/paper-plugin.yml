@@ -1,0 +1,25 @@
+name: PartyGames
+version: '${version}'
+main: me.sisko.partygames.Main
+api-version: '1.21'
+description: Left4Craft's minigame rotation
+authors:
+  - Captain_Sisko
+
+# The /play command is registered through Brigadier in Main#onEnable, so
+# there is no commands: block here -- paper-plugin.yml does not accept one.
+#
+# The old Vault and LuckPerms dependencies are gone: nothing in the plugin
+# ever called either API.
+
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  partygames.play:
+    default: op
+    description: Force-start a specific minigame with /play.

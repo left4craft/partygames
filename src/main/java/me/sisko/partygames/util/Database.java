@@ -21,10 +21,10 @@ and retriving player statistics. I would want to write the database queries
 in an async manner, but sadly placeholderapi forces this to all by sync. Instead,
 a cache is used to minimize the number of database queries needed.
 
-CREATE TABLE `partygames_stats` (
-	`uuid` CHAR(36) NOT NULL,
-	`data` VARCHAR(10000) NOT NULL,
-	PRIMARY KEY (`uuid`)
+CREATE TABLE partygames_stats (
+	uuid CHAR(36) NOT NULL,
+	data TEXT NOT NULL,
+	PRIMARY KEY (uuid)
 );
 
 */
@@ -54,25 +54,13 @@ public class Database {
             @Override
             public void run() {
                 if(cache.containsKey(op)) {
-                    final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
-                    try {
-                        Connection con = ds.getConnection();
-                        PreparedStatement ps = con.prepareStatement(query);
+                    final String upsert = "INSERT INTO partygames_stats(uuid, data) VALUES (?, ?)"
+                        + " ON CONFLICT (uuid) DO UPDATE SET data = EXCLUDED.data;";
+                    try (Connection con = ds.getConnection();
+                            PreparedStatement ps = con.prepareStatement(upsert)) {
                         ps.setString(1, op.getUniqueId().toString());
-                        ResultSet rs = ps.executeQuery();
-        
-                        String update = null;
-                        // if player already exists
-                        if(rs.next()) {
-                            update = "UPDATE partygames_stats SET data = ? WHERE uuid = ?;";
-                        } else {
-                            update = "INSERT INTO partygames_stats(data, uuid) VALUES (?, ?);";
-                        }
-                        ps = con.prepareStatement(update);
-                        ps.setString(1, cache.get(op).toString());
-                        ps.setString(2, op.getUniqueId().toString());
+                        ps.setString(2, cache.get(op).toString());
                         ps.executeUpdate();
-                        con.close();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -305,23 +293,20 @@ public class Database {
                 @Override
                 public void run() {
                     final String query = "SELECT data FROM partygames_stats WHERE uuid = ?;";
-                    try {
-                        Connection con = ds.getConnection();
-
-                        PreparedStatement ps = con.prepareStatement(query);
+                    try (Connection con = ds.getConnection();
+                            PreparedStatement ps = con.prepareStatement(query)) {
                         ps.setString(1, op.getUniqueId().toString());
-                        ResultSet rs = ps.executeQuery();
-                        if(rs.next()) {
-                            cache.put(op, new JSONObject(rs.getString("data")));
-                        } else {
-                            cache.put(op, new JSONObject());
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if(rs.next()) {
+                                cache.put(op, new JSONObject(rs.getString("data")));
+                            } else {
+                                cache.put(op, new JSONObject());
+                            }
                         }
-                        con.close();
-        
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-        
+
                 }
             }.runTaskAsynchronously(Main.getPlugin());
 

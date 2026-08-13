@@ -10,7 +10,7 @@ public class ConfigManager {
         FileConfiguration config = Main.getPlugin().getConfig();
         File dataFolder = Main.getPlugin().getDataFolder();
 
-        config.addDefault("sql.url", "jdbc:mysql://ip:port/database");
+        config.addDefault("sql.url", "jdbc:postgresql://host:port/database");
         config.addDefault("sql.user", "user");
         config.addDefault("sql.pass", "password");
 

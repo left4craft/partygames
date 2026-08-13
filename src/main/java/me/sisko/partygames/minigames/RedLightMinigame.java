@@ -20,7 +20,9 @@ import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.ChatSender.ChatSound;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
 import me.sisko.partygames.util.MinigameManager.GameState;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 
 public class RedLightMinigame extends Minigame {
 
@@ -125,7 +127,7 @@ public class RedLightMinigame extends Minigame {
                 public void run() {
                     redLight = false;
                     displayRedLight = false;
-                    ChatSender.broadcast("" + ChatColor.GREEN + ChatColor.BOLD + "Green Light", ChatSound.GREENLIGHT);
+                    ChatSender.broadcast(Component.text("Green Light", NamedTextColor.GREEN, TextDecoration.BOLD), ChatSound.GREENLIGHT);
                     setLight("red", false);
                     setLight("green", true);
                 }
@@ -149,7 +151,7 @@ public class RedLightMinigame extends Minigame {
                             setLight("red", true);
                         }
                     }.runTaskLater(Main.getPlugin(), 20);
-                    ChatSender.broadcast("" + ChatColor.RED + ChatColor.BOLD + "Red Light", ChatSound.REDLIGHT);
+                    ChatSender.broadcast(Component.text("Red Light", NamedTextColor.RED, TextDecoration.BOLD), ChatSound.REDLIGHT);
                     displayRedLight = true; 
                     setLight("green", false);
                     setLight("yellow", true);
@@ -262,7 +264,7 @@ public class RedLightMinigame extends Minigame {
         }
         retVal.add("&b&nDistance Travelled:");
         for(PlayerScore score : distanceTravelled.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;

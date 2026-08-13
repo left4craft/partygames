@@ -209,7 +209,7 @@ public class SumoMinigame extends Minigame {
         }
         retVal.add("&b&nLives Remaining");
         for(PlayerScore score : livesRemaining.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;

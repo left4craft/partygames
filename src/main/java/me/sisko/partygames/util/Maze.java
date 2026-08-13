@@ -15,7 +15,7 @@ Class representing a maze.
 Coordinate system: increasing x is right, increasing y is up
 */
 
-public class Maze {
+public final class Maze {
     // Implementing private variables
     private int height;
     private int width;

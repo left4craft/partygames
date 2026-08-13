@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONObject;
 
 import me.sisko.partygames.Main;
+import me.sisko.partygames.util.ChatSender;
 import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
@@ -220,7 +221,7 @@ public class KOTHMinigame extends Minigame {
         }
         retVal.add("&b&nKOTH Leaderboard");
         for(PlayerScore score : hillTime.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + String.format("%,.1f", score.getScore()/20d) );
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + String.format("%,.1f", score.getScore()/20d) );
         }
 
         return retVal;

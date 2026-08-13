@@ -159,7 +159,7 @@ public class MinigameRotator {
             }
 
 
-            ChatSender.broadcastOVerallWinners(leaderboard);
+            ChatSender.broadcastOverallWinners(leaderboard);
 
 
             // start the rotation for the next game
@@ -226,7 +226,7 @@ public class MinigameRotator {
             retVal.add("&b&nOverall Leaderboard");
     
             for(final PlayerScore score : leaderboard.getLeaderboard()) {
-                retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+                retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
             }
     
         }

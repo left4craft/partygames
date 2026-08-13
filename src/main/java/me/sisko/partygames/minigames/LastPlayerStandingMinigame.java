@@ -28,7 +28,8 @@ import me.sisko.partygames.util.Leaderboard;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.Leaderboard.PlayerScore;
 import me.sisko.partygames.util.MinigameManager.GameState;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class LastPlayerStandingMinigame extends Minigame {
 
@@ -121,7 +122,7 @@ public class LastPlayerStandingMinigame extends Minigame {
             p.setAllowFlight(false);
             p.setInvisible(false);
             p.setGlowing(false);
-            p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+            p.removePotionEffect(PotionEffectType.STRENGTH);
             p.getInventory().clear();
             p.setHealth(20);
         }
@@ -146,7 +147,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         p.setHealth(20);
         p.setFireTicks(0);
         p.setGlowing(false);
-        p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+        p.removePotionEffect(PotionEffectType.STRENGTH);
     }
 
     @Override
@@ -156,7 +157,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         p.setAllowFlight(false);
         p.setInvisible(false);
         p.setGlowing(false);
-        p.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+        p.removePotionEffect(PotionEffectType.STRENGTH);
         p.getInventory().clear();
         p.setHealth(20);
 
@@ -244,7 +245,7 @@ public class LastPlayerStandingMinigame extends Minigame {
         }
         retVal.add("&b&nLives Remaining");
         for(PlayerScore score : livesRemaining.getLeaderboard()) {
-            retVal.add("&a" + score.getPlayer().getDisplayName() + "&r&b: &f" + score.getScore());
+            retVal.add("&a" + ChatSender.legacyName(score.getPlayer()) + "&r&b: &f" + score.getScore());
         }
 
         return retVal;
@@ -277,15 +278,17 @@ public class LastPlayerStandingMinigame extends Minigame {
 
         // tell damager they got a kill and increment strength
         if(damager != null) {
-            ChatSender.tell(damager, "You killed " + damagee.getDisplayName() + ChatColor.GRAY + " and gained increased strength");
+            ChatSender.tell(damager, Component.text("You killed ", NamedTextColor.GRAY)
+                .append(damagee.displayName())
+                .append(Component.text(" and gained increased strength", NamedTextColor.GRAY)));
             damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.PLAYERS, 1, 0.5f);
 
-            if(damager.getPotionEffect(PotionEffectType.INCREASE_DAMAGE) == null) {
-                damager.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 0, false, false, true));
+            if(damager.getPotionEffect(PotionEffectType.STRENGTH) == null) {
+                damager.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 0, false, false, true));
             } else {
-                int amplevel = damager.getPotionEffect(PotionEffectType.INCREASE_DAMAGE).getAmplifier()+1;
-                damager.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
-                damager.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, amplevel, false, false, true));
+                int amplevel = damager.getPotionEffect(PotionEffectType.STRENGTH).getAmplifier()+1;
+                damager.removePotionEffect(PotionEffectType.STRENGTH);
+                damager.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, amplevel, false, false, true));
             }
             damager.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*10, 1, false, false, true));
 

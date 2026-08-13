@@ -29,7 +29,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import me.sisko.partygames.util.Database;
 import me.sisko.partygames.util.MinigameManager;
 import me.sisko.partygames.util.MinigameRotator;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /*
 This class listens for events that happen in the lobby
@@ -58,7 +59,7 @@ public class DefaultListener implements Listener {
         MinigameRotator.onJoin(e.getPlayer());
 
         if(!MinigameManager.addPlayer(e.getPlayer())) {
-            e.getPlayer().sendMessage(ChatColor.GREEN + "Welcome to party games!");
+            e.getPlayer().sendMessage(Component.text("Welcome to party games!", NamedTextColor.GREEN));
             e.getPlayer().setGameMode(GameMode.SURVIVAL);
             e.getPlayer().getInventory().clear();
             e.getPlayer().setGlowing(false);
