@@ -26,12 +26,12 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class RedLightMinigame extends Minigame {
 
-    final private Material GREEN_OFF = Material.GREEN_WOOL;
-    final private Material GREEN_ON = Material.LIME_WOOL;
-    final private Material YELLOW_OFF = Material.ORANGE_STAINED_GLASS;
-    final private Material YELLOW_ON = Material.YELLOW_WOOL;
-    final private Material RED_OFF = Material.RED_NETHER_BRICKS;
-    final private Material RED_ON = Material.RED_WOOL;
+    final private Material GREEN_OFF = Material.GREEN_CONCRETE;
+    final private Material GREEN_ON = Material.VERDANT_FROGLIGHT;
+    final private Material YELLOW_OFF = Material.ORANGE_CONCRETE;
+    final private Material YELLOW_ON = Material.OCHRE_FROGLIGHT;
+    final private Material RED_OFF = Material.RED_CONCRETE;
+    final private Material RED_ON = Material.SHROOMLIGHT;
 
     private Location spawn;
     private int startX;
