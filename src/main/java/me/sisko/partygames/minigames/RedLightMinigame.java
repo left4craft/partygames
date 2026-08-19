@@ -273,7 +273,7 @@ public class RedLightMinigame extends Minigame {
     private void setLight(String light, boolean on) {
         if(light.equals("red")) {
             for(int z = lightBottomZ; z < lightBottomZ + 4; z++) {
-                for(int y = lightBottomY; y < lightBottomY + 4; y++) {
+                for(int y = lightBottomY + 10; y < lightBottomY + 14; y++) {
                     if(on) {
                         Main.getWorld().getBlockAt(lightBottomX, y, z).setType(RED_ON);
                     } else {
@@ -293,7 +293,7 @@ public class RedLightMinigame extends Minigame {
             }
         } else if (light.equals("green")) {
             for(int z = lightBottomZ; z < lightBottomZ + 4; z++) {
-                for(int y = lightBottomY + 10; y < lightBottomY + 14; y++) {
+                for(int y = lightBottomY; y < lightBottomY + 4; y++) {
                     if(on) {
                         Main.getWorld().getBlockAt(lightBottomX, y, z).setType(GREEN_ON);
                     } else {
